@@ -84,7 +84,7 @@ The *getRange* method returns the currently-set measurement range of the sensor 
 server.log(format("Current Sensor Range is +/- %d G", accel.getRange()));
 ```
 
-### configureInertialInt(*state, [threshold, duration, options]*)
+### configureInertialInterrupt(*state, [threshold, duration, options]*)
 
 Configures the Inertial Interrupt generator:
 
@@ -138,7 +138,7 @@ accel.configureFreeFallInt(true);
 
 **Note:** This method will overwrite any settings configured with the *configureInertialInt*.
 
-### configureClickInt(*state, [clickType, threshold, timeLimit, latency, window]*)
+### configureClickInterrupt(*state, [clickType, threshold, timeLimit, latency, window]*)
 
 Configures the Click Interrupt Generator:
 
@@ -163,7 +163,7 @@ accel.configureClickInt(true, LIS3DH.SINGLE_CLICK);
 accel.configureClickInt(true, LIS3DH.DOUBLE_CLICK);
 ```
 
-### configureDataReadyInt(*state*)
+### configureDataReadyInterrupt(*state*)
 Enables (state = `true`) or disable (state = `false`) Data Ready interrupts on the INT1 line.
 
 ```Squirrel
