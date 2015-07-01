@@ -84,7 +84,7 @@ The *getRange* method returns the currently-set measurement range of the sensor 
 server.log(format("Current Sensor Range is +/- %d G", accel.getRange()));
 ```
 
-### configureInertialInt(state, threshold, duration, options)
+### configureInertialInt(*state, [threshold, duration, options]*)
 
 Configures the Inertial Interrupt generator:
 
@@ -242,8 +242,8 @@ Returns the 1-byte device ID of the sensor (from the WHO_AM_I register). The *ge
 server.log(format("Device ID: 0x%02X", accel.getDeviceId()));
 ```
 
-### enable([*state*])
-The *enable* methods enables (state = `true`) or disabled (state = `false`) the accelerometer. If no parameter is passed, the accelerometer will be enabled. The accelerometer is enabled by default.
+### enable(*state*)
+The *enable* methods enables (state = `true`) or disabled (state = `false`) the accelerometer. The accelerometer is enabled by default.
 
 ```squirrel
 function goToSleep() {

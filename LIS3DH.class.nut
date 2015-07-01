@@ -38,10 +38,8 @@ class LIS3DH {
     static AOI           = 0x80;
 
     // Click Detection values
-    static CLICK_OFF     = 0x00;
     static SINGLE_CLICK  = 0x15;
     static DOUBLE_CLICK  = 0x2A;
-
 
     // I2C information
     _i2c = null;
@@ -266,7 +264,7 @@ class LIS3DH {
 
         // If they disabled the click interrupt, set click_cfg register and return
         if (!state) {
-            _setReg(CLICK_CFG, CLICK_OFF);
+            _setReg(CLICK_CFG, 0x00);
             return;
         }
 
