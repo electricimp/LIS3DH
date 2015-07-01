@@ -41,6 +41,7 @@ class LIS3DH {
     static SINGLE_CLICK  = 0x15;
     static DOUBLE_CLICK  = 0x2A;
 
+
     // I2C information
     _i2c = null;
     _addr = null;
@@ -224,7 +225,7 @@ class LIS3DH {
     //-------------------- INTERRUPTS --------------------//
 
     // Enable/disable and configure inertial interrupts
-    function configureInertialInt(state, threshold = 1, duration = 5, options = null) {
+    function configureInertialInterrupt(state, threshold = 1, duration = 5, options = null) {
         // Set default value for options (using statics, so can't set in )
         if (options == null) { options = X_HIGH | Y_HIGH | Z_HIGH; }
 
@@ -250,12 +251,12 @@ class LIS3DH {
     }
 
     // Enable/disable and configure an inertial interrupt to detect free fall
-    function enableFreeFallInt(state, threshold = 0.5, duration = 5) {
+    function configureFreeFallInterrupt(state, threshold = 0.5, duration = 5) {
         configureInertialInt(state, threshold, duration, AOI | X_LOW | Y_LOW | Z_LOW);
     }
 
     // Enable/disable and configure click interrupts
-    function configureClickInt(state, clickType = null, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
+    function configureClickInterrupt(state, clickType = null, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
         // Set default value for clickType (since we're using statics we can't set in function definition)
         if (clickType == null) clickType = SINGLE_CLICK;
 
@@ -287,7 +288,7 @@ class LIS3DH {
     }
 
     // Enable/Disable Data Ready Interrupt 1 on Interrupt Pin
-    function configureDataReadyInt(state) {
+    function configureDataReadyInterrupt(state) {
         _setRegBit(CTRL_REG3, 4, state ? 1 : 0);
     }
 
