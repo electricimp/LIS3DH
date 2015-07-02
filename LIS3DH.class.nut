@@ -53,13 +53,14 @@ class LIS3DH {
         _i2c = i2c;
         _addr = addr;
 
-        init();
+        // Read and set the current range
+        getRange();
     }
 
 
     // set default values for registers, read the current range and set _range
     // (resets to state when first powered on)
-    function init() {
+    function reset() {
         // Set default values for registers
         _setReg(CTRL_REG1, 0x07);
         _setReg(CTRL_REG2, 0x00);

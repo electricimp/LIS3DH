@@ -12,6 +12,7 @@ To add this library to your project, add #require "LIS3DH.class.nut:1.0.0" to th
 
 The class’ constructor takes one required parameter (a configured imp I&sup2;C bus) and an optional parameter (the I&sup2;C address of the accelerometer):
 
+
 | Parameter     | Type         | Default | Description |
 | ------------- | ------------ | ------- | ----------- |
 | i2c           | hardware.i2c | N/A     | A pre-configured I&sup2;C bus |
@@ -232,9 +233,6 @@ accel.configureFreeFallInt(true);
 accel.configureClickInt(true, LIS3DH.DOUBLE_CLICK);
 ```
 
-### init()
-The *init* method resets all registers to datasheet default values. The *init* method is called as part of the class constructor.
-
 ### getDeviceId()
 Returns the 1-byte device ID of the sensor (from the WHO_AM_I register). The *getDeviceId* method is a simple way to test if your LIS3DH sensor is correctly connected.
 
@@ -267,6 +265,21 @@ accel.setLowPower(true);
 ```
 
 **Note:** setLowPower will change the data rate.
+
+### reset()
+The *reset* method resets all registers to datasheet default values. The reset method can be very useful during active development (as 'Build and Run' will not reset the IC).
+
+```squirrel
+#require "LIS3DH.class.nut:1.0.0"
+
+i2c <- hardware.i2c89;
+i2c.configure(CLOCK_SPEED_400_KHZ);
+
+accel <- LIS3DH(i2c, 0x32);
+
+// REMOVE BEFORE GOING TO PRODUCTION
+accel.reset();
+```
 
 ## License
 
