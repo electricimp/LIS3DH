@@ -53,14 +53,13 @@ class LIS3DH {
         _i2c = i2c;
         _addr = addr;
 
-        // Read and set the current range
-        getRange();
+        init();
     }
 
 
     // set default values for registers, read the current range and set _range
     // (resets to state when first powered on)
-    function reset() {
+    function init() {
         // Set default values for registers
         _setReg(CTRL_REG1, 0x07);
         _setReg(CTRL_REG2, 0x00);
@@ -88,8 +87,6 @@ class LIS3DH {
         local x_raw = (_getReg(OUT_X_H) << 8) + _getReg(OUT_X_L);
         local y_raw = (_getReg(OUT_Y_H) << 8) + _getReg(OUT_Y_L);
         local z_raw = (_getReg(OUT_Z_H) << 8) + _getReg(OUT_Z_L);
-
-        //server.log(format("%02X, %02X, %02X",x_raw, y_raw, z_raw));
 
         local result = {};
         if (x_raw & 0x8000) {
@@ -226,8 +223,8 @@ class LIS3DH {
     //-------------------- INTERRUPTS --------------------//
 
     // Enable/disable and configure inertial interrupts
-    function configureInertialInterrupt(state, threshold = 1, duration = 5, options = null) {
-        // Set default value for options (using statics, so can't set in )
+    function configureInertialInterrupt(state, threshold = 2.0, duration = 5, options = null) {
+        // Set default value for options (using statics, so can't set in ftcn declaration)
         if (options == null) { options = X_HIGH | Y_HIGH | Z_HIGH; }
 
         // Set the enable flag
@@ -253,7 +250,7 @@ class LIS3DH {
 
     // Enable/disable and configure an inertial interrupt to detect free fall
     function configureFreeFallInterrupt(state, threshold = 0.5, duration = 5) {
-        configureInertialInt(state, threshold, duration, AOI | X_LOW | Y_LOW | Z_LOW);
+        configureInertialInterrupt(state, threshold, duration, AOI | X_LOW | Y_LOW | Z_LOW);
     }
 
     // Enable/disable and configure click interrupts
@@ -294,7 +291,7 @@ class LIS3DH {
     }
 
     // Enables/disables interrupt latching
-    function setInterruptLatching(state) {
+    function configureInterruptLatching(state) {
         _setRegBit(CTRL_REG5, 1, state ? 1 : 0);
     }
 
@@ -324,17 +321,25 @@ class LIS3DH {
         return value & mask;
     }
 
+    function _twosComp(value, mask) {
+        value = ~(value & mask) + 1;
+        return value & mask;
+    }
+
     function _getReg(reg) {
-        local val = _i2c.read(_addr, format("%c", reg), 1);
-        if (val != null) {
-            return val[0];
-        } else {
-            return null;
+        local result = _i2c.read(_addr, reg.tochar(), 1);
+        if (result == null) {
+            throw "I2C read error: " + _i2c.readerror();
         }
+        return result[0];
     }
 
     function _setReg(reg, val) {
-        _i2c.write(_addr, format("%c%c", reg, (val & 0xff)));
+        local result = _i2c.write(_addr, format("%c%c", reg, (val & 0xff)));
+        if (result) {
+            throw "I2C write error: " + result;
+        }
+        return result;
     }
 
     function _setRegBit(reg, bit, state) {
@@ -344,7 +349,7 @@ class LIS3DH {
         } else {
             val = val | (0x01 << bit);
         }
-        _setReg(reg, val);
+        return _setReg(reg, val);
     }
 
     function dumpRegs() {

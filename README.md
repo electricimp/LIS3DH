@@ -92,14 +92,14 @@ Configures the Inertial Interrupt generator:
 | parameter | type     | default                    | description |
 | --------- | -------- | -------------------------- | ----------- |
 | state     | bool     | n/a                        | `true` to enable, `false` to disable |
-| threshold | float    | 1.0                        | Inertial interrupts threshold in *G*s. |
+| threshold | float    | 2.0                        | Inertial interrupts threshold in *G*s. |
 | duration  | int      | 5                          | Number of samples exceeding threshold required to generate interrupt |
 | options   | bitfield | X_HIGH \| Y_HIGH \| Z_HIGH | See table below |
 
 ```squirrel
 // Configure the Inertial interrupt generator to generate an interrupt
 // when acceleration on all three exceeds 1G.
-accel.configureInertialInt(true, 1.0, 10, LIS3DH.X_LOW | LIS3DH.Y_LOW | LIS3DH.Z_LOW | LIS3DH.AOI)
+accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH.X_LOW | LIS3DH.Y_LOW | LIS3DH.Z_LOW | LIS3DH.AOI)
 ```
 
 The default configuration for the Intertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 1G. This behavior can be changed by OR'ing together any of the following flags:
@@ -130,14 +130,14 @@ The following is taken from the from [LIS3DH Datasheet](http://www.st.com/st-web
 
 **Direction Recognition (11)**: An interrupt is generate when orientation is inside a known zone. The interrupt signal stay until orientation is inside the zone.
 
-### configureFreeFallInt(*state, [threshold, duration]*)
-The *configureFreeFallInt* configures the intertial interrupt generator to generate interrupts when the device is in free fall (acceleration on all axis appraoches 0). The default `threshold` is 0.5 Gs.The default `duration` is 5 sample.
+### configureFreeFallInterrupt(*state, [threshold, duration]*)
+The *configureFreeFallInterrupt* configures the intertial interrupt generator to generate interrupts when the device is in free fall (acceleration on all axis appraoches 0). The default `threshold` is 0.5 Gs.The default `duration` is 5 sample.
 
 ```Squirrel
-accel.configureFreeFallInt(true);
+accel.configureFreeFallInterrupt(true);
 ```
 
-**Note:** This method will overwrite any settings configured with the *configureInertialInt*.
+**Note:** This method will overwrite any settings configured with the *configureInertialInterrupt*.
 
 ### configureClickInterrupt(*state, [clickType, threshold, timeLimit, latency, window]*)
 
@@ -155,13 +155,13 @@ Configures the Click Interrupt Generator:
 #### Single Click example
 ```squirrel
 // Configure a single click interrupt
-accel.configureClickInt(true, LIS3DH.SINGLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH.SINGLE_CLICK);
 ```
 
 #### Double Click Example
 ```squirrel
 // configure a double click interrupt
-accel.configureClickInt(true, LIS3DH.DOUBLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
 ```
 
 ### configureDataReadyInterrupt(*state*)
@@ -169,10 +169,10 @@ Enables (state = `true`) or disable (state = `false`) Data Ready interrupts on t
 
 ```Squirrel
 accel.setDataRate(1); // 1 Hz
-accel.configureDataReadyInt(true);
+accel.configureDataReadyInterrupt(true);
 ```
 
-### setInterruptLatching(*state*)
+### configureInterruptLatching(*state*)
 Enables (state = `true`) or disables (state = `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
 
 Interrupt latching is disabled by default.
@@ -224,13 +224,13 @@ int.configure(DIGITAL_IN, interruptHandler);
 
 // Configure accelerometer
 accel.setDataRate(100);
-accel.setInterruptLatching(true);
+accel.configureInterruptLatching(true);
 
 // Setup a free fall interrupt
-accel.configureFreeFallInt(true);
+accel.configureFreeFallInterrupt(true);
 
 // Setup a double click interrupt
-accel.configureClickInt(true, LIS3DH.DOUBLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
 ```
 
 ### getDeviceId()
