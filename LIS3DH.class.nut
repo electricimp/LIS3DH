@@ -321,11 +321,6 @@ class LIS3DH {
         return value & mask;
     }
 
-    function _twosComp(value, mask) {
-        value = ~(value & mask) + 1;
-        return value & mask;
-    }
-
     function _getReg(reg) {
         local result = _i2c.read(_addr, reg.tochar(), 1);
         if (result == null) {
