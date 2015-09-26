@@ -27,6 +27,10 @@ i2c.configure(CLOCK_SPEED_400_KHZ);
 accel <- LIS3DH(i2c, 0x32); // using a non-default I2C address (SA0 pulled high)
 ```
 
+### init()
+Sets default values for registers, read the current range and set _range.  Resets to state when first powered on.
+
+
 ### setDataRate(*rate_hz*)
 The *setDataRate* method sets the Output Data Rate (ODR) of the accelerometer in Hz. The nearest supported data rate less than or equal to the requested rate will be used and returned. Supported datarates are 0 (Shutdown), 1, 10, 25, 50, 100, 200, 400, 1600, and 5000 Hz.
 
