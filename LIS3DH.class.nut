@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,0];
+    static version = [1,0,1];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -52,8 +52,6 @@ class LIS3DH {
     constructor(i2c, addr = 0x30) {
         _i2c = i2c;
         _addr = addr;
-
-        init();
     }
 
 
@@ -292,7 +290,7 @@ class LIS3DH {
 
     // Enables/disables interrupt latching
     function configureInterruptLatching(state) {
-        _setRegBit(CTRL_REG5, 1, state ? 1 : 0);
+        _setRegBit(CTRL_REG5, 3, state ? 1 : 0);
     }
 
     // Returns interrupt registers as a table, and clears the INT1_SRC register

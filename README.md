@@ -4,7 +4,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-To add this library to your project, add #require "LIS3DH.class.nut:1.0.0" to the top of your device code.
+To add this library to your project, add #require "LIS3DH.class.nut:1.0.1" to the top of your device code.
 
 ## Class Methods
 
@@ -19,13 +19,17 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 | addr          | byte         | 0x30    | The I&sup2;C address of the accelerometer |
 
 ```squirrel
-#require "LIS3DH.class.nut:1.0.0"
+#require "LIS3DH.class.nut:1.0.1"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
 
 accel <- LIS3DH(i2c, 0x32); // using a non-default I2C address (SA0 pulled high)
 ```
+
+### init()
+Sets default values for registers, read the current range and set _range.  Resets to state when first powered on.
+
 
 ### setDataRate(*rate_hz*)
 The *setDataRate* method sets the Output Data Rate (ODR) of the accelerometer in Hz. The nearest supported data rate less than or equal to the requested rate will be used and returned. Supported datarates are 0 (Shutdown), 1, 10, 25, 50, 100, 200, 400, 1600, and 5000 Hz.
@@ -270,7 +274,7 @@ accel.setLowPower(true);
 The *reset* method resets all registers to datasheet default values. The reset method can be very useful during active development (as 'Build and Run' will not reset the IC).
 
 ```squirrel
-#require "LIS3DH.class.nut:1.0.0"
+#require "LIS3DH.class.nut:1.0.1"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
@@ -283,4 +287,4 @@ accel.reset();
 
 ## License
 
-The LIS3DH class is licensed under [MIT License](./LICENSE).
+The LIS3DH class is licensed under [MIT License](https://github.com/electricimp/lis3dh/blob/master/LICENSE).
