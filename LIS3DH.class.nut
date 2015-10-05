@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,1];
+    static version = [1,0,2];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -52,6 +52,9 @@ class LIS3DH {
     constructor(i2c, addr = 0x30) {
         _i2c = i2c;
         _addr = addr;
+
+        // Read the range + set _range property
+        getRange();
     }
 
 
