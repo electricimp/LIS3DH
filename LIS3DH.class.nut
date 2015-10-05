@@ -273,7 +273,7 @@ class LIS3DH {
 
         // Set the CLICK_THS register
         if (threshold < 0) { threshold = threshold * -1.0; }    // Make sure we have a positive value
-        if (threshold > _range) { threshold = range; }          // Make sure it doesn't exceed the _range
+        if (threshold > _range) { threshold = _range; }          // Make sure it doesn't exceed the _range
 
         threshold = (((threshold * 1.0) / (_range * 1.0)) * 127).tointeger();
         _setReg(CLICK_THS, threshold);
