@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,1];
+    static version = [1,0,2];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -52,6 +52,9 @@ class LIS3DH {
     constructor(i2c, addr = 0x30) {
         _i2c = i2c;
         _addr = addr;
+
+        // Read the range + set _range property
+        getRange();
     }
 
 
@@ -270,7 +273,7 @@ class LIS3DH {
 
         // Set the CLICK_THS register
         if (threshold < 0) { threshold = threshold * -1.0; }    // Make sure we have a positive value
-        if (threshold > _range) { threshold = range; }          // Make sure it doesn't exceed the _range
+        if (threshold > _range) { threshold = _range; }          // Make sure it doesn't exceed the _range
 
         threshold = (((threshold * 1.0) / (_range * 1.0)) * 127).tointeger();
         _setReg(CLICK_THS, threshold);
