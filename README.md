@@ -179,6 +179,8 @@ accel.configureDataReadyInterrupt(true);
 ### configureInterruptLatching(*state*)
 Enables (state = `true`) or disables (state = `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
 
+Inertial and free fall are the only interrupts compatible with latching mode.     
+
 Interrupt latching is disabled by default.
 
 **See sample code in *getInterruptTable()*.**
@@ -201,7 +203,7 @@ The *getInterruptTable* method reads the INT1_SRC and CLICK_SRC registers, and r
 }
 ```
 
-In the following example we setup interrupts for free fall detection, and double click detection, and check what caused the interrupt in our interrupt handler:
+In the following example we setup an interrupt for double click detection:
 
 ```Squirrel
 function interruptHandler() {
@@ -211,9 +213,6 @@ function interruptHandler() {
     local data = accel.getInterruptTable();
 
     // Check what kind of interrupt it was
-    if (data.int1) {
-        server.log("Free Fall");
-    }
     if (data.doubleClick) {
         server.log("Double Click");
     }
@@ -228,13 +227,92 @@ int.configure(DIGITAL_IN, interruptHandler);
 
 // Configure accelerometer
 accel.setDataRate(100);
-accel.configureInterruptLatching(true);
-
-// Setup a free fall interrupt
-accel.configureFreeFallInterrupt(true);
 
 // Setup a double click interrupt
 accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
+```
+
+In the following example we setup an interrupt for free fall detection:
+
+```Squirrel
+
+function sensorSetup() {
+	// Configure accelerometer
+	accel.setDataRate(100);
+	accel.configureInterruptLatching(true);
+
+	// Setup a free fall interrupt
+	accel.configureFreeFallInterrupt(true);
+}
+
+// Put imp to Sleep
+function sleep(timer) {
+    server.log("going to sleep for " + timer + " sec");
+    if (server.isconnected()) {
+        imp.onidle(function() { server.sleepfor(timer); });
+    } else {
+        imp.deepsleepfor(timer);
+    }
+}
+
+// Take reading
+function takeReading() {
+    accel.getAccel(function(result) {
+        if ("err" in result) { 
+            // check for error
+            server.log(result.err); 
+        } else {
+            // add timestamp to result table
+            result.ts <- time();
+            // log reading
+            foreach(k, v in result) {
+	            server.log(k + ": " + v);
+	        }
+        }
+    });
+}
+
+function interruptHandler() {
+    if (int.read() == 0) return;
+
+    // Get + clear the interrupt + clear
+    local data = accel.getInterruptTable();
+
+    // Check what kind of interrupt it was
+    if (data.int1) {
+        server.log("Free Fall");
+    }
+	sleep(30);
+}
+
+i2c <- hardware.i2c89;
+i2c.configure(CLOCK_SPEED_400_KHZ);
+accel <- LIS3DH(i2c, 0x32);
+
+int <- hardware.pinB;
+wake <- hardware.pin1;
+
+int.configure(DIGITAL_IN);
+wake.configure(DIGITAL_IN_WAKEUP);
+
+// Handle WakeUp
+switch(hardware.wakereason()) {
+    case WAKEREASON_TIMER:
+        server.log("WOKE UP B/C TIMER EXPIRED");
+        takeReading();
+        imp.wakeup(2, function() { sleep(30); })
+        break;
+    case WAKEREASON_PIN:
+        server.log("WOKE UP B/C PIN HIGH");
+        interruptHandler();
+        break;
+    default:
+        server.log("WOKE UP B/C RESTARTED DEVICE, LOADED NEW CODE, ETC");
+        sensorSetup();
+        takeReading();
+        imp.wakeup(2, function() { sleep(30); })
+}
+
 ```
 
 ### getDeviceId()
