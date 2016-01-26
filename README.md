@@ -4,7 +4,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-To add this library to your project, add #require "LIS3DH.class.nut:1.0.2" to the top of your device code.
+To add this library to your project, add #require "LIS3DH.class.nut:1.0.3" to the top of your device code.
 
 ## Class Methods
 
@@ -19,7 +19,7 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 | addr          | byte         | 0x30    | The I&sup2;C address of the accelerometer |
 
 ```squirrel
-#require "LIS3DH.class.nut:1.0.2"
+#require "LIS3DH.class.nut:1.0.3"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
@@ -72,11 +72,11 @@ accel.getAccel(function(val) {
 ```
 
 ### setRange(*range_g*)
-The *setRange* method sets the measurement range of the sensor in *G*s. The default measurement range is +/- 2G. The nearest supported range less than or equal to the requested range will be used and returned. Supported ranges are (+/-) 2, 4, 6, 8, and 16 G.
+The *setRange* method sets the measurement range of the sensor in *G*s. The default measurement range is +/- 2G. The nearest supported range less than or equal to the requested range will be used and returned. Supported ranges are (+/-) 2, 4, 8, and 16 G.
 
 ```Squirrel
-// set sensor range to +/- 6 G
-local range = accel.setRange(6);
+// set sensor range to +/- 8 G
+local range = accel.setRange(8);
 server.log(format("Range set to +/- %d G", range));
 ```
 
@@ -348,11 +348,11 @@ accel.setLowPower(true);
 
 **Note:** setLowPower will change the data rate.
 
-### reset()
-The *reset* method resets all registers to datasheet default values. The reset method can be very useful during active development (as 'Build and Run' will not reset the IC).
+### init()
+The *init* method resets all registers to datasheet default values. The init method can be very useful during active development (as 'Build and Run' will not reset the IC).
 
 ```squirrel
-#require "LIS3DH.class.nut:1.0.2"
+#require "LIS3DH.class.nut:1.0.3"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
@@ -360,7 +360,7 @@ i2c.configure(CLOCK_SPEED_400_KHZ);
 accel <- LIS3DH(i2c, 0x32);
 
 // REMOVE BEFORE GOING TO PRODUCTION
-accel.reset();
+accel.init();
 ```
 
 ## License
