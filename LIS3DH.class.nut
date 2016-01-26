@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,2];
+    static version = [1,0,3];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
