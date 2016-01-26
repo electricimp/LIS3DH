@@ -160,7 +160,7 @@ class LIS3DH {
 
     // set the full-scale range of the accelerometer (default +/- 2G)
     function setRange(range_a) {
-        local val = _getReg(CTRL_REG2) & 0xC7;
+        local val = _getReg(CTRL_REG4) & 0xCF;
         local range_bits = 0;
         if (range_a <= 2) {
             range_bits = 0x00;
@@ -168,30 +168,25 @@ class LIS3DH {
         } else if (range_a <= 4) {
             range_bits = 0x01;
             _range = 4;
-        } else if (range_a <= 6) {
-            range_bits = 0x02;
-            _range = 6;
         } else if (range_a <= 8) {
-            range_bits = 0x03;
+            range_bits = 0x02;
             _range = 8;
         } else {
-            range_bits = 0x04;
+            range_bits = 0x03;
             _range = 16;
         }
-        _setReg(CTRL_REG2, val | (range_bits << 3));
+        _setReg(CTRL_REG2, val | (range_bits << 4));
         return _range;
     }
 
     // get the currently-set full-scale range of the accelerometer
     function getRange() {
-        local range_bits = (_getReg(CTRL_REG2) & 0x38) >> 3;
+        local range_bits = (_getReg(CTRL_REG4) & 0x30) >> 4;
         if (range_bits == 0x00) {
             _range = 2;
         } else if (range_bits = 0x01) {
             _range = 4;
         } else if (range_bits = 0x02) {
-            _range = 6;
-        } else if (range_bits = 0x03) {
             _range = 8;
         } else {
             _range = 16;

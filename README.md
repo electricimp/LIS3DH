@@ -72,11 +72,11 @@ accel.getAccel(function(val) {
 ```
 
 ### setRange(*range_g*)
-The *setRange* method sets the measurement range of the sensor in *G*s. The default measurement range is +/- 2G. The nearest supported range less than or equal to the requested range will be used and returned. Supported ranges are (+/-) 2, 4, 6, 8, and 16 G.
+The *setRange* method sets the measurement range of the sensor in *G*s. The default measurement range is +/- 2G. The nearest supported range less than or equal to the requested range will be used and returned. Supported ranges are (+/-) 2, 4, 8, and 16 G.
 
 ```Squirrel
-// set sensor range to +/- 6 G
-local range = accel.setRange(6);
+// set sensor range to +/- 8 G
+local range = accel.setRange(8);
 server.log(format("Range set to +/- %d G", range));
 ```
 
