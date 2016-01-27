@@ -175,7 +175,7 @@ class LIS3DH {
             range_bits = 0x03;
             _range = 16;
         }
-        _setReg(CTRL_REG2, val | (range_bits << 4));
+        _setReg(CTRL_REG4, val | (range_bits << 4));
         return _range;
     }
 
