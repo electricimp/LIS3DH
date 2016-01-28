@@ -32,7 +32,7 @@ Sets default values for registers, read the current range and set _range.  Reset
 
 
 ### setDataRate(*rate_hz*)
-The *setDataRate* method sets the Output Data Rate (ODR) of the accelerometer in Hz. The nearest supported data rate less than or equal to the requested rate will be used and returned. Supported datarates are 0 (Shutdown), 1, 10, 25, 50, 100, 200, 400, 1600, and 5000 Hz.
+The *setDataRate* method sets the Output Data Rate (ODR) of the accelerometer in Hz. The nearest supported data rate less than or equal to the requested rate will be used and returned. Supported datarates are 0 (Shutdown), 1, 10, 25, 50, 100, 200, 400, 1250 (Normal Mode only), 1600 (Low Power Mode only), and 5000 (Low Power Mode only) Hz.
 
 ```squirrel
 local rate = accel.setDataRate(100);
@@ -179,7 +179,7 @@ accel.configureDataReadyInterrupt(true);
 ### configureInterruptLatching(*state*)
 Enables (state = `true`) or disables (state = `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
 
-Inertial and free fall are the only interrupts compatible with latching mode.     
+Inertial and free fall are the only interrupts compatible with latching mode.
 
 Interrupt latching is disabled by default.
 
@@ -258,9 +258,9 @@ function sleep(timer) {
 // Take reading
 function takeReading() {
     accel.getAccel(function(result) {
-        if ("err" in result) { 
+        if ("err" in result) {
             // check for error
-            server.log(result.err); 
+            server.log(result.err);
         } else {
             // add timestamp to result table
             result.ts <- time();
