@@ -184,9 +184,9 @@ class LIS3DH {
         local range_bits = (_getReg(CTRL_REG4) & 0x30) >> 4;
         if (range_bits == 0x00) {
             _range = 2;
-        } else if (range_bits = 0x01) {
+        } else if (range_bits == 0x01) {
             _range = 4;
-        } else if (range_bits = 0x02) {
+        } else if (range_bits == 0x02) {
             _range = 8;
         } else {
             _range = 16;
