@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,3];
+    static version = [1,0,4];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -124,7 +124,7 @@ class LIS3DH {
     function setDataRate(rate) {
         local val = _getReg(CTRL_REG1) & 0x0F;
         local normal_mode = (val < 8);
-        if (rate <= 0) {
+        if (rate == 0) {
             // 0b0000 -> power-down mode
             // we've already ANDed-out the top 4 bits; just write back
             rate = 0;
