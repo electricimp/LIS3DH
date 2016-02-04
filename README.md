@@ -4,11 +4,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-<<<<<<< HEAD
-To add this library to your project, add #require "LIS3DH.class.nut:1.0.4" to the top of your device code.
-=======
-**To add this library to your project, add** `#require "LIS3DH.class.nut:1.0.3"` **to the top of your device code**
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
+**To add this library to your project, add** `#require "LIS3DH.class.nut:1.0.4"` **to the top of your device code**
 
 ## Class Usage
 
@@ -37,7 +33,6 @@ accel <- LIS3DH(i2c, 0x32); // using a non-default I2C address (SA0 pulled high)
 ## Class Methods
 
 ### init()
-<<<<<<< HEAD
 The *init* method resets all control and interrupt registers to datasheet default values.
 
 ```squirrel
@@ -49,32 +44,12 @@ accel.init();
 The *setDataRate* method sets the Output Data Rate (ODR) of the accelerometer in Hz. Supported datarates are 0 (Shutdown), 1, 10, 25, 50, 100, 200, 400, 1250 (Normal Mode only), 1600 (Low Power Mode only), and 5000 (Low Power Mode only) Hz. The datarate will be rounded up to the closest supported rate and the actual datarate will be returned.
 
 The default datarate is 0 (Shutdown).  To take a reading with *getAccel()* you must set a datarate greater than 0.
-=======
-
-The *init()* method resets all registers to datasheet default values. This can be very useful during active development as clicking ‘Build and Run’ will not reset the chip.
-
-```squirrel
-i2c <- hardware.i2c89;
-i2c.configure(CLOCK_SPEED_400_KHZ);
-
-accel <- LIS3DH(i2c, 0x32);
-
-// ***REMOVE BEFORE GOING TO PRODUCTION***
-accel.reset();
-// ***************************************
-```
-
-### setDataRate(*rateHz*)
-
-The *setDataRate()* method sets the Output Data Rate (ODR) of the accelerometer in Hz. The nearest supported data rate less than or equal to the requested rate will be used and returned. Supported datarates are 0 (Shutdown), 1, 10, 25, 50, 100, 200, 400, 1600 and 5000Hz.
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
 
 ```squirrel
 local rate = accel.setDataRate(100);
 server.log(format("Accelerometer running at %d Hz",rate));
 ```
 
-<<<<<<< HEAD
 ### setLowPower(*state*)
 The *setLowPower* method configures the device to run in low-power or normal mode. The method takes one boolean parameter *state*.  When state is *true* low-power mode will be enabled.  When state is *false* normal mode will enabled. Normal mode guarantees high resolution, low power mode reduces the current consumption.  Higher datarates only support specific modes.  See *setDataRate* for details.
 
@@ -114,43 +89,16 @@ The *getAccel* method reads the latest measurement from the accelerometer.  The 
 
 #####Synchronous Example:
 
-```Squirrel
-=======
-**Note** The datarate must be set before reading the accelerometer with *getAccel()*.
-
-### getAccel(*[callback]*)
-
-The *getAccel()* method reads and returns the latest measurement from the accelerometer as a table (in Gs):
-
 ```squirrel
-{ x: <xData>, y: <yData>, z: <zData> }
-```
-
-```squirrel
-// Create and enable the sensor
-i2c <- hardware.i2c89;
-i2c.configure(CLOCK_SPEED_400_KHZ);
-accel <- LIS3DH(i2c, 0x32);
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
 accel.setDataRate(100);
 
 local val = accel.getAccel()
 server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", val.x, val.y, val.z));
 ```
 
-<<<<<<< HEAD
 #####Asynchronous Example:
 
-```Squirrel
-=======
-An optional callback (with a single parameter) can be passed to *getAccel()*. If a callback is included, the class will read the sensor data and pass the result to the callback method as the first parameter:
-
 ```squirrel
-// Create and enable the sensor
-i2c <- hardware.i2c89;
-i2c.configure(CLOCK_SPEED_400_KHZ);
-accel <- LIS3DH(i2c, 0x32);
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
 accel.setDataRate(100);
 
 accel.getAccel(function(val) {
@@ -159,26 +107,16 @@ accel.getAccel(function(val) {
 ```
 
 ### setRange(*range_g*)
-<<<<<<< HEAD
 The *setRange* method sets the measurement range of the sensor in *G*s. Supported ranges are (+/-) 2, 4, 8, and 16 G. The datarate will be rounded up to the closest supported range and the actual range will be returned.
 
 The default measurement range is +/- 2G.
-=======
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
-
-The *setRange()* method sets the measurement range of the sensor in Gs. The default measurement range is &plusmn;2G. The nearest supported range less than or equal to the requested range will be used and returned. Supported ranges are (&plusmn;) 2, 4, 6, 8 and 16G.
 
 ```squirrel
-// Set sensor range to +/- 6 G
-local range = accel.setRange(6);
+// Set sensor range to +/- 8 G
+local range = accel.setRange(8);
 server.log(format("Range set to +/- %d G", range));
 ```
 
-<<<<<<< HEAD
-=======
-**Note** If you are not using the default &plusmn;2G range, you must set the range with *setRange()* before setting interrupt thresholds with *setInertialIntThreshold()* or *setClickIntThreshold()*.
-
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
 ### getRange()
 
 The *getRange()* method returns the currently-set measurement range of the sensor in Gs.
@@ -204,7 +142,6 @@ Configures the Inertial Interrupt generator:
 accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH.X_LOW | LIS3DH.Y_LOW | LIS3DH.Z_LOW | LIS3DH.AOI)
 ```
 
-<<<<<<< HEAD
 The default configuration for the Intertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 2G. This behavior can be changed by OR'ing together any of the following flags:
 
 | flag   | description |
@@ -217,20 +154,6 @@ The default configuration for the Intertial Interrupt generator is to generate a
 | Z_HIGH | Generates an interrupt when the z-axis acceleration goes above the threshold |
 | AOI    | Sets the AOI flag (see **Inertial Interrupt Modes** below) |
 | SIX_D  | Sets the 6D flag (see **Inertial Interrupt Modes** below) |
-=======
-The default configuration for the Intertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 1G. This behavior can be changed by OR-ing together any of the following flags:
-
-| flag   | description |
-| ------ | ----------- |
-| *X_LOW*  | Generates an interrupt when the x-axis acceleration goes below the threshold |
-| *X_HIGH* | Generates an interrupt when the x-axis acceleration goes above the threshold |
-| *Y_LOW*  | Generates an interrupt when the y-axis acceleration goes below the threshold |
-| *Y_HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
-| *Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
-| *Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
-| *AOI*    | Sets the AOI flag *(see ‘Inertial Interrupt Modes’ below)* |
-| *SIX_D*  | Sets the 6D flag *(see ‘Inertial Interrupt Modes’ below)* |
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
 
 #### Inertial Interrupt Modes
 
@@ -295,12 +218,7 @@ accel.configureDataReadyInterrupt(true);
 
 ### configureInterruptLatching(*state*)
 
-<<<<<<< HEAD
-=======
 Enables (*state* is `true`) or disables (*state* is `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
-
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
-Inertial and free fall are the only interrupts compatible with latching mode.
 
 Interrupt latching is disabled by default.
 
@@ -442,37 +360,6 @@ Returns the one-byte device ID of the sensor (from the *WHO_AM_I* register). The
 ```squirrel
 server.log(format("Device ID: 0x%02X", accel.getDeviceId()));
 ```
-
-<<<<<<< HEAD
-=======
-### enable(*state*)
-
-The *enable()* methods enables (*state* is `true`) or disabled (*state* is `false`) the accelerometer. The accelerometer is enabled by default.
-
-```squirrel
-function goToSleep() {
-    imp.onidle(function() {
-        // Set data rate to 0 and disable the accelerometer to save power
-        accel.setDataRate(0);
-        accel.enable(false);
-
-        // Sleep for 1 hour
-        server.sleepfor(3600);
-    });
-}
-```
-
-### setLowPower(*state*)
-
-The *setLowPower()* method enables (*state* is `true`) or disables (*state* is `false`) low-power mode.
-
-```squirrel
-// Enable low-power mode
-accel.setLowPower(true);
-```
->>>>>>> 0f6e789c59ec6bb5d2aaa988c60d49a2d5b69119
-
-**Note** *setLowPower()* will change the data rate.
 
 ## License
 
