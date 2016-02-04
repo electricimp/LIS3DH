@@ -1,6 +1,6 @@
 # LIS3DH 3-Axis Accelerometer
 
-The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a 3-Axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it. 
+The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a 3-Axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it.
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
@@ -10,7 +10,7 @@ To add this library to your project, add #require "LIS3DH.class.nut:1.0.4" to th
 
 ### constructor(*i2c, [addr]*)
 
-The class’ constructor takes one required parameter (a configured imp I&sup2;C bus) and an optional parameter (the I&sup2;C address of the accelerometer).  The I&sup2;C address must be the address of your sensor or an I&sup2;C error will be thrown.  
+The class’ constructor takes one required parameter (a configured imp I&sup2;C bus) and an optional parameter (the I&sup2;C address of the accelerometer).  The I&sup2;C address must be the address of your sensor or an I&sup2;C error will be thrown.
 
 
 | Parameter     | Type         | Default | Description |
@@ -57,9 +57,9 @@ accel.setLowPower(true);
 ```
 
 ### enable([*state*])
-The *enable* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter *state*.  By default *state* is set to true.  When state is *true* the accelerometer will be enabled.  When state is *false* the accelerometer will be disabled.  
+The *enable* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter *state*.  By default *state* is set to true.  When state is *true* the accelerometer will be enabled.  When state is *false* the accelerometer will be disabled.
 
-The accelerometer is enabled by default.  
+The accelerometer is enabled by default.
 
 ```squirrel
 function goToSleep() {
@@ -78,7 +78,7 @@ function goToSleep() {
 The *getAccel* method reads the latest measurement from the accelerometer.  The method takes an optional callback for asynchronous operation. The callback should take one parameter: a results table (see below). If the callback is null or omitted, the method will return the results table to the caller instead.
 
 | Axis     | Measurement in *G*s |
-| -------- | ------------------- | 
+| -------- | ------------------- |
 | x        | x measurement       |
 | y        | y measurement       |
 | z        | z measurement       |
@@ -105,7 +105,7 @@ accel.getAccel(function(val) {
 ### setRange(*range_g*)
 The *setRange* method sets the measurement range of the sensor in *G*s. Supported ranges are (+/-) 2, 4, 8, and 16 G. The datarate will be rounded up to the closest supported range and the actual range will be returned.
 
-The default measurement range is +/- 2G. 
+The default measurement range is +/- 2G.
 
 ```Squirrel
 // set sensor range to +/- 8 G
@@ -268,12 +268,12 @@ In the following example we setup an interrupt for free fall detection:
 ```Squirrel
 
 function sensorSetup() {
-	// Configure accelerometer
-	accel.setDataRate(100);
-	accel.configureInterruptLatching(true);
+    // Configure accelerometer
+    accel.setDataRate(100);
+    accel.configureInterruptLatching(true);
 
-	// Setup a free fall interrupt
-	accel.configureFreeFallInterrupt(true);
+    // Setup a free fall interrupt
+    accel.configureFreeFallInterrupt(true);
 }
 
 // Put imp to Sleep
@@ -297,8 +297,8 @@ function takeReading() {
             result.ts <- time();
             // log reading
             foreach(k, v in result) {
-	            server.log(k + ": " + v);
-	        }
+                server.log(k + ": " + v);
+            }
         }
     });
 }
@@ -313,7 +313,7 @@ function interruptHandler() {
     if (data.int1) {
         server.log("Free Fall");
     }
-	sleep(30);
+    sleep(30);
 }
 
 i2c <- hardware.i2c89;
