@@ -208,8 +208,9 @@ accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
 ```
 
 ### configureDataReadyInterrupt(*state*)
-
-Enables (*state* is `true`) or disables (*state* is `false`) Data Ready interrupts on the INT1 line.
+Enables (*state* is `true`) or disables (*state* is `false`) Data Ready interrupts on the INT1 line.  The data-ready signal rises to 1 when a new set of acceleration data has been generated
+and it is available for reading.The interrupt is reset when the higher part of the data of all the
+enabled channels has been read.
 
 ```squirrel
 accel.setDataRate(1); // 1 Hz
