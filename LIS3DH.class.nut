@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,3];
+    static version = [1,0,4];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -123,9 +123,11 @@ class LIS3DH {
     // Set Accelerometer Data Rate in Hz
     function setDataRate(rate) {
         local val = _getReg(CTRL_REG1) & 0x0F;
+        local normal_mode = (val < 8);
         if (rate == 0) {
             // 0b0000 -> power-down mode
             // we've already ANDed-out the top 4 bits; just write back
+            rate = 0;
         } else if (rate <= 1) {
             val = val | 0x10;
             rate = 1;
@@ -147,10 +149,13 @@ class LIS3DH {
         } else if (rate <= 400) {
             val = val | 0x70;
             rate = 400;
+        } else if (normal_mode) {
+            val = val | 0x90;
+            rate = 1250;
         } else if (rate <= 1600) {
             val = val | 0x80;
             rate = 1600;
-        } else if (rate <= 5000) {
+        } else {
             val = val | 0x90;
             rate = 5000;
         }
