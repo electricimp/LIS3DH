@@ -4,7 +4,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-**To add this library to your project, add** `#require "LIS3DH.class.nut:1.0.4"` **to the top of your device code**
+**To add this library to your project, add** `#require "LIS3DH.class.nut:1.2.0"` **to the top of your device code**
 
 ## Class Usage
 
@@ -20,7 +20,7 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 &nbsp;<br>
 
 ```squirrel
-#require "LIS3DH.class.nut:1.0.4"
+#require "LIS3DH.class.nut:1.2.0"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
@@ -85,8 +85,8 @@ function goToSleep() {
 The *getAccel()* method reads the latest measurement from the accelerometer. The method takes an optional callback for asynchronous operation &mdash; it will block otherwise. The callback should take one parameter: a results table *(see below)*. If the callback is null or omitted, the method will return the results table.
 
 ```
-{ "x": <xData>, 
-  "y": <yData>, 
+{ "x": <xData>,
+  "y": <yData>,
   "z": <zData> }
 ```
 
@@ -354,6 +354,42 @@ switch(hardware.wakereason()) {
         imp.wakeup(2, function() { sleep(30); })
 }
 ```
+
+### configureHighPassFilter(filters[, cutOffFlag, mode])
+
+This method configures the high pass filter.
+
+| Parameter | Type | Default Value | Description |
+| --- | --- | --- | --- |
+| *filters*     | Constant | N/A | Select the filter(s) to enable.  *LIS3DH.HPF_CLICK* See filter table below. |
+| *cutOffFlag* | Integer | 0x00 | See high-pass filter cut-off frequency table below. |
+| *mode* | Constant | *LIS3DH.DEFAULT_NORMAL_MODE* | See modes in table below. |
+
+##### Filter table
+Select the filters to enable/disable by OR'ing together any of the following:
+| Filter | Description |
+| ------ | --------- |
+| HPF_AOI_INT1 |  High pass filter enabled for AOI function on interrupt 1 |
+| HPF_AOI_INT2 |  High pass filter enabled for AOI function on interrupt 2 |
+| HPF_CLICK | High pass filter enabled for CLICK function |
+| FDS | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
+| HPF_DISABLED | Disables all filters |
+
+##### High-pass filter cut-off frequency table
+| cutOffFlag | f [Hz] @ 1Hz | f [Hz] @ 10Hz | f [Hz] @ 25Hz | f [Hz] @ 50Hz | f [Hz] @ 100Hz | f [Hz] @ 200Hz | f [Hz] @ 400Hz | f [Hz] @ 1.6kHz | f [Hz] @ 5kHz |
+| ------- | --------- | ------- | --------- | ------- | --------- | ------- | --------- | ------- |
+| 0x00 | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
+| 0x01 | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
+| 0x02 | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
+| 0x03 | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
+
+##### Mode table
+| Filter | Description |
+| ------ | --------- |
+| DEFAULT_NORMAL_MODE |  Normal mode (reset reading HP_RESET_FILTER) |
+| REFERENCE_SIGNAL | Reference signal for filtering |
+| NORMAL_MODE | Normal mode |
+| AUTORESET_ON_INTERRUPT |  Autoreset on interrupt event |
 
 ### getDeviceId()
 
