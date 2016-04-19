@@ -355,7 +355,7 @@ switch(hardware.wakereason()) {
 }
 ```
 
-### configureHighPassFilter(filters[, cutOffFlag, mode])
+### configureHighPassFilter(*filters[, cutOffFlag, mode]*)
 
 This method configures the high pass filter.
 
@@ -367,6 +367,7 @@ This method configures the high pass filter.
 
 ##### Filter table
 Select the filters to enable/disable by OR'ing together any of the following:
+
 | Filter | Description |
 | ------ | --------- |
 | HPF_AOI_INT1 |  High pass filter enabled for AOI function on interrupt 1 |
@@ -376,7 +377,8 @@ Select the filters to enable/disable by OR'ing together any of the following:
 | HPF_DISABLED | Disables all filters |
 
 ##### High-pass filter cut-off frequency table
-| cutOffFlag | f [Hz] @ 1Hz | f [Hz] @ 10Hz | f [Hz] @ 25Hz | f [Hz] @ 50Hz | f [Hz] @ 100Hz | f [Hz] @ 200Hz | f [Hz] @ 400Hz | f [Hz] @ 1.6kHz | f [Hz] @ 5kHz |
+
+| cutOffFlag | f [Hz] @1Hz | f [Hz] @10Hz | f [Hz] @25Hz | f [Hz] @50Hz | f [Hz] @100Hz | f [Hz] @200Hz | f [Hz] @400Hz | f [Hz] @1.6kHz | f [Hz] @5kHz |
 | ------- | --------- | ------- | --------- | ------- | --------- | ------- | --------- | ------- |
 | 0x00 | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
 | 0x01 | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
@@ -384,6 +386,7 @@ Select the filters to enable/disable by OR'ing together any of the following:
 | 0x03 | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
 
 ##### Mode table
+
 | Filter | Description |
 | ------ | --------- |
 | DEFAULT_NORMAL_MODE |  Normal mode (reset reading HP_RESET_FILTER) |
