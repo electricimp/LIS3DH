@@ -378,12 +378,13 @@ Select the filters to enable/disable by OR'ing together any of the following:
 
 ##### High-pass filter cut-off frequency table
 
-| cutOffFlag | f [Hz] @1Hz | f [Hz] @10Hz | f [Hz] @25Hz | f [Hz] @50Hz | f [Hz] @100Hz | f [Hz] @200Hz | f [Hz] @400Hz | f [Hz] @1.6kHz | f [Hz] @5kHz |
-| ------- | --------- | ------- | --------- | ------- | --------- | ------- | --------- | ------- |
+| cutOffFlag | f [Hz] @1Hz | f [Hz] @10Hz | f [Hz] @25Hz | f [Hz] @50Hz | f [Hz] @100Hz | f [Hz] @200Hz | f [Hz] @400Hz | f [Hz] @1.6kHz | f [Hz] @5kHz | 
+| ---------- | ----------- | ------------ | ------------ | ------------ | ------------- | ------------- | ------------- | -------------- | ------------ |
 | 0x00 | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
 | 0x01 | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
 | 0x02 | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
 | 0x03 | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
+
 
 ##### Mode table
 
