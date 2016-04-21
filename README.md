@@ -362,8 +362,8 @@ This method configures the high pass filter.
 | Parameter | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | *filters*     | Constant | N/A | Select the filter(s) to enable.  *LIS3DH.HPF_CLICK* See filter table below. |
-| *cutOffFlag* | Integer | 0x00 | See high-pass filter cut-off frequency table below. |
-| *mode* | Constant | *LIS3DH.DEFAULT_NORMAL_MODE* | See modes in table below. |
+| *cutOffFlag* | Constant |*LIS3DH.HPF_CUTOFF1* | See high-pass filter cut-off frequency table below. |
+| *mode* | Constant | *LIS3DH.HPF_DEFAULT_MODE* | See modes in table below. |
 
 ##### Filter table
 Select the filters to enable/disable by OR'ing together any of the following:
@@ -373,27 +373,27 @@ Select the filters to enable/disable by OR'ing together any of the following:
 | HPF_AOI_INT1 |  High pass filter enabled for AOI function on interrupt 1 |
 | HPF_AOI_INT2 |  High pass filter enabled for AOI function on interrupt 2 |
 | HPF_CLICK | High pass filter enabled for CLICK function |
-| FDS | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
+| HPF_FDS | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
 | HPF_DISABLED | Disables all filters |
 
 ##### High-pass filter cut-off frequency table
 
-| cutOffFlag | f [Hz] @1Hz | f [Hz] @10Hz | f [Hz] @25Hz | f [Hz] @50Hz | f [Hz] @100Hz | f [Hz] @200Hz | f [Hz] @400Hz | f [Hz] @1.6kHz | f [Hz] @5kHz | 
+| cutOffFlag | f [Hz] @1Hz | f [Hz] @10Hz | f [Hz] @25Hz | f [Hz] @50Hz | f [Hz] @100Hz | f [Hz] @200Hz | f [Hz] @400Hz | f [Hz] @1.6kHz | f [Hz] @5kHz |
 | ---------- | ----------- | ------------ | ------------ | ------------ | ------------- | ------------- | ------------- | -------------- | ------------ |
-| 0x00 | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
-| 0x01 | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
-| 0x02 | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
-| 0x03 | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
+| HPF_CUTOFF1 | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
+| HPF_CUTOFF2 | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
+| HPF_CUTOFF3 | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
+| HPF_CUTOFF4 | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
 
 
 ##### Mode table
 
 | Filter | Description |
 | ------ | --------- |
-| DEFAULT_NORMAL_MODE |  Normal mode (reset reading HP_RESET_FILTER) |
-| REFERENCE_SIGNAL | Reference signal for filtering |
-| NORMAL_MODE | Normal mode |
-| AUTORESET_ON_INTERRUPT |  Autoreset on interrupt event |
+| HPF_DEFAULT_MODE |  Normal mode (reset reading HP_RESET_FILTER) |
+| HPF_REFERENCE_SIGNAL | Reference signal for filtering |
+| HPF_NORMAL_MODE | Normal mode |
+| HPF_AUTORESET_ON_INTERRUPT |  Autoreset on interrupt event |
 
 ### getDeviceId()
 

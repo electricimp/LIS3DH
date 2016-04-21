@@ -42,12 +42,17 @@ class LIS3DH {
     static HPF_AOI_INT1  = 0x01;
     static HPF_AOI_INT2  = 0x02;
     static HPF_CLICK      = 0x04;
-    static FDS           = 0x08;
+    static HPF_FDS       = 0x08;
 
-    static DEFAULT_NORMAL_MODE = 0x00;
-    static REFERENCE_SIGNAL = 0x40;
-    static NORMAL_MODE = 0x80;
-    static AUTORESET_ON_INTERRUPT = 0xC0;
+    static HPF_CUTOFF1 = 0x00;
+    static HPF_CUTOFF2 = 0x10;
+    static HPF_CUTOFF3 = 0x20;
+    static HPF_CUTOFF4 = 0x30;
+
+    static HPF_DEFAULT_MODE = 0x00;
+    static HPF_REFERENCE_SIGNAL = 0x40;
+    static HPF_NORMAL_MODE = 0x80;
+    static HPF_AUTORESET_ON_INTERRUPT = 0xC0;
 
     // Click Detection values
     static SINGLE_CLICK  = 0x15;
@@ -233,26 +238,18 @@ class LIS3DH {
         return _getReg(WHO_AM_I);
     }
 
-    function configureHighPassFilter(filters, cutOffFlag = 0x00, mode = null) {
+    function configureHighPassFilter(filters, cutoff = null, mode = null) {
         // clear and set filters
         filters = HPF_DISABLED | filters;
 
-        // set default mode
-        if (mode == null) { mode = DEFAULT_NORMAL_MODE; }
+        // set default cutoff mode
+        if (cutoff == null) { cutoff = HPF_CUTOFF1; }
 
-        // shift cutOffFlag to reg2 value
-        if (cutOffFlag == 0x03) {
-            cutOffFlag = 0x30;
-        } else if (cutOffFlag == 0x02) {
-            cutOffFlag = 0x20;
-        } else if (cutOffFlag == 0x01) {
-            cutOffFlag = 0x10;
-        } else {
-            cutOffFlag = 0x00;
-        }
+        // set default mode
+        if (mode == null) { mode = HPF_DEFAULT_MODE; }
 
         // set register
-        _setReg(CTRL_REG2, filters | cutOffFlag | mode);
+        _setReg(CTRL_REG2, filters | cutoff | mode);
     }
 
     //-------------------- INTERRUPTS --------------------//
