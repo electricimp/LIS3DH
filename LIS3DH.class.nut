@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,0,4];
+    static version = [1,2,0];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -36,6 +36,23 @@ class LIS3DH {
     static Z_HIGH        = 0x20;
     static SIX_D         = 0x40;
     static AOI           = 0x80;
+
+    // High Pass Filter values
+    static HPF_DISABLED  = 0x00;
+    static HPF_AOI_INT1  = 0x01;
+    static HPF_AOI_INT2  = 0x02;
+    static HPF_CLICK      = 0x04;
+    static HPF_FDS       = 0x08;
+
+    static HPF_CUTOFF1 = 0x00;
+    static HPF_CUTOFF2 = 0x10;
+    static HPF_CUTOFF3 = 0x20;
+    static HPF_CUTOFF4 = 0x30;
+
+    static HPF_DEFAULT_MODE = 0x00;
+    static HPF_REFERENCE_SIGNAL = 0x40;
+    static HPF_NORMAL_MODE = 0x80;
+    static HPF_AUTORESET_ON_INTERRUPT = 0xC0;
 
     // Click Detection values
     static SINGLE_CLICK  = 0x15;
@@ -219,6 +236,20 @@ class LIS3DH {
     // Returns the deviceID (should be 51)
     function getDeviceId() {
         return _getReg(WHO_AM_I);
+    }
+
+    function configureHighPassFilter(filters, cutoff = null, mode = null) {
+        // clear and set filters
+        filters = HPF_DISABLED | filters;
+
+        // set default cutoff mode
+        if (cutoff == null) { cutoff = HPF_CUTOFF1; }
+
+        // set default mode
+        if (mode == null) { mode = HPF_DEFAULT_MODE; }
+
+        // set register
+        _setReg(CTRL_REG2, filters | cutoff | mode);
     }
 
     //-------------------- INTERRUPTS --------------------//
