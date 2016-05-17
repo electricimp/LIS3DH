@@ -231,17 +231,16 @@ Interrupt latching is disabled by default.
 The *getInterruptTable()* method reads the LIS3DH’s *INT1_SRC* and *CLICK_SRC* registers, and returns the result as a table with the following fields:
 
 ```squirrel
-{   "int1": bool,           // true if INT1 created the interrupt
-    "xLow": bool,           // true if a xLow condition is present
-    "yLow": bool,           // true if a yLow condition is present
-    "zLow": bool,           // true if a zLow condition is present
-    "xHigh": bool,          // true if a xHigh condition is present
-    "yHigh": bool,          // true if a yHigh condition is present
-    "zHigh": bool,          // true if a zHigh condition is present
-    "click": bool,          // true if any click created the interrupt
-    "singleClick": bool,    // true if a single click created the interrupt
-    "doubleClick": bool     // true if a double click created the interrupt
-}
+{ "int1": bool,           // true if INT1 created the interrupt
+  "xLow": bool,           // true if a xLow condition is present
+  "yLow": bool,           // true if a yLow condition is present
+  "zLow": bool,           // true if a zLow condition is present
+  "xHigh": bool,          // true if a xHigh condition is present
+  "yHigh": bool,          // true if a yHigh condition is present
+  "zHigh": bool,          // true if a zHigh condition is present
+  "click": bool,          // true if any click created the interrupt
+  "singleClick": bool,    // true if a single click created the interrupt
+  "doubleClick": bool }   // true if a double click created the interrupt
 ```
 
 In the following example we setup an interrupt for double-click detection:
