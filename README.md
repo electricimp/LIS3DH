@@ -231,8 +231,7 @@ Interrupt latching is disabled by default.
 The *getInterruptTable()* method reads the LIS3DH’s *INT1_SRC* and *CLICK_SRC* registers, and returns the result as a table with the following fields:
 
 ```squirrel
-{
-    "int1": bool,           // true if INT1 created the interrupt
+{   "int1": bool,           // true if INT1 created the interrupt
     "xLow": bool,           // true if a xLow condition is present
     "yLow": bool,           // true if a yLow condition is present
     "zLow": bool,           // true if a zLow condition is present
