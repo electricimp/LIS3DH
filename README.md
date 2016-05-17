@@ -272,7 +272,7 @@ accel.setDataRate(100);
 accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
 ```
 
-In the following example we setup an interrupt for free fall detection:
+In the following example we setup an interrupt for free-fall detection:
 
 ```squirrel
 function sensorSetup() {
