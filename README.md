@@ -136,7 +136,7 @@ This method configures the inertial interrupt generator:
 | *state*     | Boolean | N/A | `true` to enable, `false` to disable |
 | *threshold* | Float   | 2.0 | Inertial interrupts threshold in Gs |
 | *duration*  | Integer | 5 | Number of samples exceeding threshold required to generate interrupt |
-| *options* | bitfield | *X_HIGH* | *Y_HIGH* | *Z_HIGH* | See table below |
+| *options* | bitfield | *X_HIGH* \| *Y_HIGH* \| *Z_HIGH* | See table below |
 
 ```squirrel
 // Configure the Inertial interrupt generator to generate an interrupt
@@ -154,7 +154,7 @@ The default configuration for the Intertial Interrupt generator is to generate a
 | *Y_HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
 | *Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
 | *Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
-| *AOI *   | Sets the AOI flag *(see ‘Inertial Interrupt Modes’ below)* |
+| *AOI*   | Sets the AOI flag *(see ‘Inertial Interrupt Modes’ below)* |
 | *SIX_D*  | Sets the 6D flag *(see ‘Inertial Interrupt Modes’ below)* |
 
 #### Inertial Interrupt Modes
