@@ -1,5 +1,5 @@
 class LIS3DH {
-    static version = [1,2,0];
+    static version = [1,3,0];
 
     // Registers
     static TEMP_CFG_REG  = 0x1F;
@@ -15,6 +15,8 @@ class LIS3DH {
     static OUT_Y_H       = 0x2B;
     static OUT_Z_L       = 0x2C;
     static OUT_Z_H       = 0x2D;
+    static FIFO_CTRL_REG = 0x2E;
+    static FIFO_SRC_REG  = 0x2F;
     static INT1_CFG      = 0x30;
     static INT1_SRC      = 0x31;
     static INT1_THS      = 0x32;
@@ -53,6 +55,11 @@ class LIS3DH {
     static HPF_REFERENCE_SIGNAL = 0x40;
     static HPF_NORMAL_MODE = 0x80;
     static HPF_AUTORESET_ON_INTERRUPT = 0xC0;
+    
+    static FIFO_BYPASS_MODE = 0x00;
+    static FIFO_FIFO_MODE = 0x40;
+    static FIFO_STREAM_MODE = 0x80;
+    static FIFO_STREAM_TO_FIFO_MODE = 0xC0;
 
     // Click Detection values
     static SINGLE_CLICK  = 0x15;
@@ -94,6 +101,7 @@ class LIS3DH {
         _setReg(TIME_LIMIT, 0x00);
         _setReg(TIME_LATENCY, 0x00);
         _setReg(TIME_WINDOW, 0x00);
+        _setReg(FIFO_CTRL_REG, 0x00);
 
         // Read the range + set _range property
         getRange();
@@ -254,6 +262,24 @@ class LIS3DH {
 
     //-------------------- INTERRUPTS --------------------//
 
+    // Enable/disable and configure FIFO buffer watermark interrupts
+    function configureFifoInterrupt(state, fifomode = 0x80, watermark = 28) {
+        
+        // Enable/disable the FIFO buffer
+        _setRegBit(CTRL_REG5, 6, state ? 1 : 0);
+        
+        if (state) {
+            // Stream-to-FIFO mode, watermark of [28].
+            _setReg(FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F)); 
+        } else {
+            _setReg(FIFO_CTRL_REG, 0x00); 
+        }
+        
+        // Enable/disable watermark interrupt
+        _setRegBit(CTRL_REG3, 2, state ? 1 : 0);
+        
+    }
+
     // Enable/disable and configure inertial interrupts
     function configureInertialInterrupt(state, threshold = 2.0, duration = 5, options = null) {
         // Set default value for options (using statics, so can't set in ftcn declaration)
@@ -345,6 +371,16 @@ class LIS3DH {
             "doubleClick":  (click & 0x20) != 0
         }
     }
+    
+    function getFifoStats() {
+        local stats = _getReg(FIFO_SRC_REG);
+        return {
+            "watermark": (stats & 0x80) != 0,
+            "overrun": (stats & 0x40) != 0,
+            "empty": (stats & 0x20) != 0,
+            "unread": (stats & 0x1F) + ((stats & 0x40) ? 1 : 0) 
+        }
+    }
 
 
     //-------------------- PRIVATE METHODS --------------------//
@@ -390,5 +426,7 @@ class LIS3DH {
         server.log(format("INT1_CFG 0x%02X", _getReg(INT1_CFG)));
         server.log(format("INT1_SRC 0x%02X", _getReg(INT1_SRC)));
         server.log(format("INT1_THS 0x%02X", _getReg(INT1_THS)));
+        server.log(format("FIFO_CTRL_REG 0x%02X", _getReg(FIFO_CTRL_REG)));
+        server.log(format("FIFO_SRC_REG 0x%02X", _getReg(FIFO_SRC_REG)));
     }
 }
