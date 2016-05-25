@@ -127,6 +127,31 @@ The *getRange()* method returns the currently-set measurement range of the senso
 server.log(format("Current Sensor Range is +/- %dG", accel.getRange()));
 ```
 
+### configureFifoInterrupt(*state[, fifomode][, watermark]*)
+
+This method configures an interrupt when the FIFO buffer reaches the set watermark:
+
+| Parameter | Type | Default Value | Description |
+| --------- | ---- | ------------- | ----------- |
+| *state* | Boolean | N/A | `true` to enable, `false` to disable |
+| *fifomode* | bitfield | *FIFO_STREAM_MODE* | See table below |
+| *watermark* | Integer | 28 | Number of buffer slots filled to generate<br> interrupt (buffer has 32 slots) |
+
+```squirrel
+// Configure the FIFO buffer in Stream Mode and set interrupt generator to
+// generate an interrupt when there are 30 entries in the buffer
+accel.configureFifoInterrupt(true, FIFO_STREAM_MODE, 30);
+```
+
+#### FIFO modes
+    
+| Mode | Description |
+| ---- | ----------- |
+| *FIFO_BYPASS_MODE*  | Disables the FIFO buffer (only the first address is used for each channel) |
+| *FIFO_FIFO_MODE* | When full, the FIFO buffer stops collecting data from the input channels |
+| *FIFO_STREAM_MODE*  | When full, the FIFO buffer discards the older data as the new arrive |
+| *FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br> Once trigger event occurs, the FIFO buffer starts operating in FIFO mode.  |
+
 ### configureInertialInterrupt(*state[, threshold][, duration][, options]*)
 
 This method configures the inertial interrupt generator:
@@ -352,6 +377,17 @@ switch(hardware.wakereason()) {
         imp.wakeup(2, function() { sleep(30); })
 }
 ```
+
+### getFifoStats()
+
+This method returns information about the state of the FIFO buffer in a squirrel table:
+
+| Value | Type | Description |
+| --- | --- | --- | --- |
+| *watermark* | Boolean | `true` if watermark has been set |
+| *overrun* | Boolean | `true` if data has been overwritten without being read |
+| *empty* | Boolean | `true` if buffer is empty  |
+| *unread* | Integer | Number of unread slots in buffer |
 
 ### configureHighPassFilter(*filters[, cutoff][, mode]*)
 
