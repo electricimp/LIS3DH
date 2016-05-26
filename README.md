@@ -4,7 +4,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-**To add this library to your project, add** `#require "LIS3DH.class.nut:1.2.0"` **to the top of your device code**
+**To add this library to your project, add** `#require "LIS3DH.class.nut:1.3.0"` **to the top of your device code**
 
 ## Class Usage
 
@@ -20,7 +20,7 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 &nbsp;<br>
 
 ```squirrel
-#require "LIS3DH.class.nut:1.2.0"
+#require "LIS3DH.class.nut:1.3.0"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
@@ -126,6 +126,70 @@ The *getRange()* method returns the currently-set measurement range of the senso
 ```squirrel
 server.log(format("Current Sensor Range is +/- %dG", accel.getRange()));
 ```
+
+### configureFifoInterrupt(*state[, fifomode][, watermark]*)
+
+This method configures an interrupt when the FIFO buffer reaches the set watermark:
+
+| Parameter | Type | Default Value | Description |
+| --------- | ---- | ------------- | ----------- |
+| *state* | Boolean | N/A | `true` to enable, `false` to disable |
+| *fifomode* | bitfield | *FIFO_STREAM_MODE* | See table below |
+| *watermark* | Integer | 28 | Number of buffer slots filled to generate<br> interrupt (buffer has 32 slots) |
+
+This example sets the FIFO buffer to Stream Mode and reads the data from
+the buffer whenever the watermark is reached:
+
+```squirrel
+// Function to read from FIFO buffer
+function readBuffer() {
+    
+    if (wakePin.read() == 0) return;
+    
+    // Read buffer
+    local stats = accel.getFifoStats();
+    for (local i = 0; i < stats.unread; ++i) {
+        local data = accel.getAccel();
+        server.log(format("Accel (x,y,z): [%d, %d, %d]", data.x, data.y, data.z));
+    }
+
+    // Check if we are now overrun        
+    local stats = accel.getFifoStats();
+    if (stats.overrun) {
+        server.error("Accelerometer buffer overrun")
+        
+        // Set FIFO mode to bypass to clear the buffer and then return to stream mode
+        accel.configureFifoInterrupt(true, accel.FIFO_BYPASS_MODE);
+        accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
+    }
+
+}
+
+i2c  <- hardware.i2cAB;
+i2c.configure(CLOCK_SPEED_400_KHZ);
+accel <- LIS3DH(i2c);
+
+// Configure interrupt pin
+wakePin <- hardware.pinW;
+wakePin.configure(DIGITAL_IN_PULLDOWN, readBuffer);
+
+// Configure accelerometer
+accel.init();
+accel.setDataRate(100);
+
+// Configure the FIFO buffer in Stream Mode and set interrupt generator to
+// generate an interrupt when there are 30 entries in the buffer
+accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
+```
+
+#### FIFO modes
+    
+| Mode | Description |
+| ---- | ----------- |
+| *FIFO_BYPASS_MODE*  | Disables the FIFO buffer (only the first address is used for each channel) |
+| *FIFO_FIFO_MODE* | When full, the FIFO buffer stops collecting data from the input channels |
+| *FIFO_STREAM_MODE*  | When full, the FIFO buffer discards the older data as the new arrive |
+| *FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br> Once trigger event occurs, the FIFO buffer starts operating in FIFO mode.  |
 
 ### configureInertialInterrupt(*state[, threshold][, duration][, options]*)
 
@@ -352,6 +416,17 @@ switch(hardware.wakereason()) {
         imp.wakeup(2, function() { sleep(30); })
 }
 ```
+
+### getFifoStats()
+
+This method returns information about the state of the FIFO buffer in a squirrel table:
+
+| Value | Type | Description |
+| --- | --- | --- | --- |
+| *watermark* | Boolean | `true` if watermark has been set |
+| *overrun* | Boolean | `true` if data has been overwritten without being read |
+| *empty* | Boolean | `true` if buffer is empty  |
+| *unread* | Integer | Number of unread slots in buffer |
 
 ### configureHighPassFilter(*filters[, cutoff][, mode]*)
 
