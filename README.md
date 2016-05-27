@@ -17,8 +17,6 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 | *i2cBus*      | hardware.i2c | N/A     | A pre-configured I&sup2;C bus |
 | *i2cAddress*  | byte         | 0x30    | The I&sup2;C address of the accelerometer |
 
-&nbsp;<br>
-
 ```squirrel
 #require "LIS3DH.class.nut:1.3.0"
 
@@ -63,7 +61,7 @@ Normal mode is enabled by default.
 accel.setLowPower(true);
 ```
 
-### enable([*state*])
+### enable(*[state]*)
 
 The *enable()* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter, *state*.  By default *state* is set to `true` and the accelerometer is enabled. When *state* is `false`, the accelerometer will be disabled.
 
@@ -135,7 +133,7 @@ This method configures an interrupt when the FIFO buffer reaches the set waterma
 | --------- | ---- | ------------- | ----------- |
 | *state* | Boolean | N/A | `true` to enable, `false` to disable |
 | *fifomode* | bitfield | *FIFO_STREAM_MODE* | See table below |
-| *watermark* | Integer | 28 | Number of buffer slots filled to generate<br> interrupt (buffer has 32 slots) |
+| *watermark* | Integer | 28 | Number of buffer slots filled to generate<br>interrupt (buffer has 32 slots) |
 
 This example sets the FIFO buffer to Stream Mode and reads the data from
 the buffer whenever the watermark is reached:
@@ -148,7 +146,7 @@ function readBuffer() {
     
     // Read buffer
     local stats = accel.getFifoStats();
-    for (local i = 0; i < stats.unread; ++i) {
+    for (local i = 0 ; i < stats.unread ; ++i) {
         local data = accel.getAccel();
         server.log(format("Accel (x,y,z): [%d, %d, %d]", data.x, data.y, data.z));
     }
@@ -156,7 +154,7 @@ function readBuffer() {
     // Check if we are now overrun        
     local stats = accel.getFifoStats();
     if (stats.overrun) {
-        server.error("Accelerometer buffer overrun")
+        server.error("Accelerometer buffer overrun");
         
         // Set FIFO mode to bypass to clear the buffer and then return to stream mode
         accel.configureFifoInterrupt(true, accel.FIFO_BYPASS_MODE);
@@ -177,8 +175,8 @@ wakePin.configure(DIGITAL_IN_PULLDOWN, readBuffer);
 accel.init();
 accel.setDataRate(100);
 
-// Configure the FIFO buffer in Stream Mode and set interrupt generator to
-// generate an interrupt when there are 30 entries in the buffer
+// Configure the FIFO buffer in Stream Mode and set interrupt generator
+// to generate an interrupt when there are 30 entries in the buffer
 accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
 ```
 
@@ -189,7 +187,7 @@ accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
 | *FIFO_BYPASS_MODE*  | Disables the FIFO buffer (only the first address is used for each channel) |
 | *FIFO_FIFO_MODE* | When full, the FIFO buffer stops collecting data from the input channels |
 | *FIFO_STREAM_MODE*  | When full, the FIFO buffer discards the older data as the new arrive |
-| *FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br> Once trigger event occurs, the FIFO buffer starts operating in FIFO mode.  |
+| *FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br>Once trigger event occurs, the FIFO buffer starts operating in FIFO mode |
 
 ### configureInertialInterrupt(*state[, threshold][, duration][, options]*)
 
@@ -419,9 +417,9 @@ switch(hardware.wakereason()) {
 
 ### getFifoStats()
 
-This method returns information about the state of the FIFO buffer in a squirrel table:
+This method returns information about the state of the FIFO buffer in a Squirrel table with the following keys:
 
-| Value | Type | Description |
+| Key | Type | Description |
 | --- | --- | --- | --- |
 | *watermark* | Boolean | `true` if watermark has been set |
 | *overrun* | Boolean | `true` if data has been overwritten without being read |
