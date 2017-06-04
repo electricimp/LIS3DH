@@ -28,6 +28,7 @@ class LIS3DH {
     static TIME_LATENCY  = 0x3C;
     static TIME_WINDOW   = 0x3D;
     static WHO_AM_I      = 0x0F;
+    static OUT_X_L_INCR  = 0xA8;    
 
     // bitfield values
     static X_LOW         = 0x01;
@@ -110,28 +111,18 @@ class LIS3DH {
     // Read data from the Accelerometer
     // Returns a table {x: <data>, y: <data>, z: <data>}
     function getAccel(cb = null) {
-        local x_raw = (_getReg(OUT_X_H) << 8) + _getReg(OUT_X_L);
-        local y_raw = (_getReg(OUT_Y_H) << 8) + _getReg(OUT_Y_L);
-        local z_raw = (_getReg(OUT_Z_H) << 8) + _getReg(OUT_Z_L);
-
         local result = {};
-        if (x_raw & 0x8000) {
-            result.x <- (-1.0) * _twosComp(x_raw, 0xffff);
-        } else {
-            result.x <- x_raw;
+        
+        // Read entire block with auto-increment
+        local reading = _i2c.read(_addr, OUT_X_L_INCR.tochar(), 6);
+        if (reading == null) {
+            throw "I2C read error: " + _i2c.readerror();
         }
 
-        if (y_raw & 0x8000) {
-            result.y <- (-1.0) * _twosComp(y_raw, 0xffff);
-        } else {
-            result.y <- y_raw;
-        }
-
-        if (z_raw & 0x8000) {
-            result.z <- (-1.0) * _twosComp(z_raw, 0xffff);
-        } else {
-            result.z <- z_raw;
-        }
+        // Read and sign extend
+        result.x <- ((reading[0] | (reading[1] << 8)) << 16) >> 16;
+        result.y <- ((reading[2] | (reading[3] << 8)) << 16) >> 16;
+        result.z <- ((reading[4] | (reading[5] << 8)) << 16) >> 16;
 
         // multiply by full-scale range to return in G
         result.x = (result.x / 32000.0) * _range;
@@ -384,11 +375,6 @@ class LIS3DH {
 
 
     //-------------------- PRIVATE METHODS --------------------//
-    function _twosComp(value, mask) {
-        value = ~(value & mask) + 1;
-        return value & mask;
-    }
-
     function _getReg(reg) {
         local result = _i2c.read(_addr, reg.tochar(), 1);
         if (result == null) {
