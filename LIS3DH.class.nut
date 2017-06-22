@@ -341,7 +341,7 @@ class LIS3DH {
 
     // Enables/disables interrupt latching
     function configureInterruptLatching(state) {
-        _setRegBit(CTRL_REG6, 7, state ? 1 : 0);
+        _setRegBit(CTRL_REG3, 7, state ? 1 : 0);
     }
 
     // Returns interrupt registers as a table, and clears the INT1_SRC register
