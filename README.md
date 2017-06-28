@@ -415,7 +415,7 @@ switch(hardware.wakereason()) {
 
 ### getFifoStats()
 
-This method returns information about the state of the FIFO buffer in a Squirrel table with the following keys:
+This method returns information about the state of the FIFO buffer in a Squirrel table with the following keys.
 
 | Key | Type | Description |
 | --- | --- | --- | --- |
