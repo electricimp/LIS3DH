@@ -4,7 +4,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-**To add this library to your project, add** `#require "LIS3DH.class.nut:1.3.0"` **to the top of your device code**
+**To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.0"` **to the top of your device code**
 
 ## Class Usage
 
@@ -18,8 +18,6 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 | *i2cAddress*  | byte         | 0x30    | The I&sup2;C address of the accelerometer |
 
 ```squirrel
-#require "LIS3DH.class.nut:1.3.0"
-
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
 
