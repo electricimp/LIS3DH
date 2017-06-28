@@ -130,7 +130,7 @@ This method configures an interrupt when the FIFO buffer reaches the set waterma
 | Parameter | Type | Default Value | Description |
 | --------- | ---- | ------------- | ----------- |
 | *state* | Boolean | N/A | `true` to enable, `false` to disable |
-| *fifomode* | bitfield | *FIFO_STREAM_MODE* | See table below |
+| *fifomode* | bitfield | *LIS3DH_FIFO_STREAM_MODE* | See table below |
 | *watermark* | Integer | 28 | Number of buffer slots filled to generate<br>interrupt (buffer has 32 slots) |
 
 This example sets the FIFO buffer to Stream Mode and reads the data from
@@ -155,8 +155,8 @@ function readBuffer() {
         server.error("Accelerometer buffer overrun");
         
         // Set FIFO mode to bypass to clear the buffer and then return to stream mode
-        accel.configureFifoInterrupt(true, accel.FIFO_BYPASS_MODE);
-        accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
+        accel.configureFifoInterrupt(true, LIS3DH_FIFO_BYPASS_MODE);
+        accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
     }
 
 }
@@ -175,17 +175,17 @@ accel.setDataRate(100);
 
 // Configure the FIFO buffer in Stream Mode and set interrupt generator
 // to generate an interrupt when there are 30 entries in the buffer
-accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
+accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
 ```
 
 #### FIFO modes
     
 | Mode | Description |
 | ---- | ----------- |
-| *FIFO_BYPASS_MODE*  | Disables the FIFO buffer (only the first address is used for each channel) |
-| *FIFO_FIFO_MODE* | When full, the FIFO buffer stops collecting data from the input channels |
-| *FIFO_STREAM_MODE*  | When full, the FIFO buffer discards the older data as the new arrive |
-| *FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br>Once trigger event occurs, the FIFO buffer starts operating in FIFO mode |
+| *LIS3DH_FIFO_BYPASS_MODE*  | Disables the FIFO buffer (only the first address is used for each channel) |
+| *LIS3DH_FIFO_FIFO_MODE* | When full, the FIFO buffer stops collecting data from the input channels |
+| *LIS3DH_FIFO_STREAM_MODE*  | When full, the FIFO buffer discards the older data as the new arrive |
+| *LIS3DH_FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br>Once trigger event occurs, the FIFO buffer starts operating in FIFO mode |
 
 ### configureInertialInterrupt(*state[, threshold][, duration][, options]*)
 
@@ -196,26 +196,26 @@ This method configures the inertial interrupt generator:
 | *state*     | Boolean | N/A | `true` to enable, `false` to disable |
 | *threshold* | Float   | 2.0 | Inertial interrupts threshold in Gs |
 | *duration*  | Integer | 5 | Number of samples exceeding threshold<br>required to generate interrupt |
-| *options* | bitfield | *X_HIGH* \| *Y_HIGH* \| *Z_HIGH* | See table below |
+| *options* | bitfield | *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH* | See table below |
 
 ```squirrel
 // Configure the Inertial interrupt generator to generate an interrupt
 // when acceleration on all three exceeds 1G.
-accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH.X_LOW | LIS3DH.Y_LOW | LIS3DH.Z_LOW | LIS3DH.AOI)
+accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW | LIS3DH_AOI)
 ```
 
 The default configuration for the Intertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 2G. This behavior can be changed by OR'ing together any of the following flags:
 
 | Flag   | Description |
 | ------ | ----------- |
-| *X_LOW*  | Generates an interrupt when the x-axis acceleration goes below the threshold |
-| *X_HIGH* | Generates an interrupt when the x-axis acceleration goes above the threshold |
-| *Y_LOW*  | Generates an interrupt when the y-axis acceleration goes below the threshold |
-| *Y_HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
-| *Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
-| *Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
-| *AOI*   | Sets the AOI flag *(see ‘Inertial Interrupt Modes’ below)* |
-| *SIX_D*  | Sets the 6D flag *(see ‘Inertial Interrupt Modes’ below)* |
+| *LIS3DH_X_LOW*  | Generates an interrupt when the x-axis acceleration goes below the threshold |
+| *LIS3DH_X_HIGH* | Generates an interrupt when the x-axis acceleration goes above the threshold |
+| *LIS3DH_Y_LOW*  | Generates an interrupt when the y-axis acceleration goes below the threshold |
+| *YLIS3DH__HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
+| *LIS3DH_Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
+| *LIS3DH_Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
+| *LIS3DH_AOI*   | Sets the AOI flag *(see ‘Inertial Interrupt Modes’ below)* |
+| *LIS3DH_SIX_D*  | Sets the 6D flag *(see ‘Inertial Interrupt Modes’ below)* |
 
 #### Inertial Interrupt Modes
 
@@ -249,24 +249,24 @@ Configures the click interrupt generator:
 | Parameter | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | *state*     | Boolean | N/A | `true` to enable, `false` to disable |
-| *clickType* | Constant | *LIS3DH.SINGLE_CLICK* | *LIS3DH.SINGLE_CLICK* or *LIS3DH.DOUBLE_CLICK* |
+| *clickType* | Constant | *LIS3DH_SINGLE_CLICK* | *LIS3DH_SINGLE_CLICK* or *LIS3DH_DOUBLE_CLICK* |
 | *threshold* | Float | 1.1 | Threshold that must be exceeded to be considered a click |
 | *timeLimit* | Float | 5 | Max time in *ms* the acceleration can spend above the threshold to be considered a click |
-| *latency*   | Float | 10 | Min time in *ms* between the end of one click event and the start of another to be considered a *LIS3DH.DOUBLE_CLICK* |
-| *window*    | Float | 50 | Max time in *ms* between the start of one click event and end of another to be considered a *LIS3DH.DOUBLE_CLICK* |
+| *latency*   | Float | 10 | Min time in *ms* between the end of one click event and the start of another to be considered a *LIS3DH_DOUBLE_CLICK* |
+| *window*    | Float | 50 | Max time in *ms* between the start of one click event and end of another to be considered a *LIS3DH_DOUBLE_CLICK* |
 
 #### Single Click Example
 
 ```squirrel
 // Configure a single click interrupt
-accel.configureClickInterrupt(true, LIS3DH.SINGLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH_SINGLE_CLICK);
 ```
 
 #### Double Click Example
 
 ```squirrel
 // configure a double click interrupt
-accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
 ```
 
 ### configureDataReadyInterrupt(*state*)
@@ -329,7 +329,7 @@ int.configure(DIGITAL_IN, interruptHandler);
 accel.setDataRate(100);
 
 // Set up a double-click interrupt
-accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
 ```
 
 In the following example we setup an interrupt for free-fall detection:
@@ -430,46 +430,46 @@ This method configures the high-pass filter.
 
 | Parameter | Type | Default Value | Description |
 | --- | --- | --- | --- |
-| *filters*     | Constant | N/A | Select the filter(s) to enable/disable by OR-ing together any of the constants found in the filter table below |
-| *cutoff* | Constant |*LIS3DH.HPF_CUTOFF1* | See high-pass filter cut-off frequency table below |
-| *mode* | Constant | *LIS3DH.HPF_DEFAULT_MODE* | See modes in table below |
+| *filters* | Constant | N/A | Select the filter(s) to enable/disable by OR-ing together any of the constants found in the filter table below |
+| *cutoff* | Constant |*LIS3DH_HPF_CUTOFF1* | See high-pass filter cut-off frequency table below |
+| *mode* | Constant | *LIS3DH_HPF_DEFAULT_MODE* | See modes in table below |
 
 #### Filter table
 
 | Filter | Description |
 | ------ | --------- |
-| *HPF_AOI_INT1* |  High-pass filter enabled for AOI function on interrupt 1 |
-| *HPF_AOI_INT2* |  High-pass filter enabled for AOI function on interrupt 2 |
-| *HPF_CLICK* | High-pass filter enabled for CLICK function |
-| *HPF_FDS* | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
-| *HPF_DISABLED* | Disables all filters |
+| *LIS3DH_HPF_AOI_INT1* |  High-pass filter enabled for AOI function on interrupt 1 |
+| *LIS3DH_HPF_AOI_INT2* |  High-pass filter enabled for AOI function on interrupt 2 |
+| *LIS3DH_HPF_CLICK* | High-pass filter enabled for CLICK function |
+| *LIS3DH_HPF_FDS* | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
+| *LIS3DH_HPF_DISABLED* | Disables all filters |
 
 #### High-pass filter cut-off frequency table
 
 | Cutoff | f [Hz] @1Hz | f [Hz] @10Hz | f [Hz] @25Hz | f [Hz] @50Hz | f [Hz] @100Hz | f [Hz] @200Hz | f [Hz] @400Hz | f [Hz] @1.6kHz | f [Hz] @5kHz |
 | ---------- | ----------- | ------------ | ------------ | ------------ | ------------- | ------------- | ------------- | -------------- | ------------ |
-| *HPF_CUTOFF1* | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
-| *HPF_CUTOFF2* | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
-| *HPF_CUTOFF3* | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
-| *HPF_CUTOFF4* | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
+| *LIS3DH_HPF_CUTOFF1* | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
+| *LIS3DH_HPF_CUTOFF2* | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
+| *LIS3DH_HPF_CUTOFF3* | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
+| *LIS3DH_HPF_CUTOFF4* | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
 
 #### Mode table
 
 | Filter | Description |
 | ------ | --------- |
-| *HPF_DEFAULT_MODE* |  Normal mode (reset reading *HP_RESET_FILTER*) |
-| *HPF_REFERENCE_SIGNAL* | Reference signal for filtering |
-| *HPF_NORMAL_MODE* | Normal mode |
-| *HPF_AUTORESET_ON_INTERRUPT* |  Autoreset on interrupt event |
+| *LIS3DH_HPF_DEFAULT_MODE* |  Normal mode (reset reading *HP_RESET_FILTER*) |
+| *LIS3DH_HPF_REFERENCE_SIGNAL* | Reference signal for filtering |
+| *LIS3DH_HPF_NORMAL_MODE* | Normal mode |
+| *LIS3DH_HPF_AUTORESET_ON_INTERRUPT* |  Autoreset on interrupt event |
 
 #### Example
 
 ```squirrel
 // Enable high-pass filter on click and intertial interrupt 1 with auto reset on interrupt event
-accel.configureHighPassFilter(LIS3DH.HPF_AOI_INT1 | LIS3DH.HPF_CLICK, null, LIS3DH.HPF_AUTORESET_ON_INTERRUPT);
+accel.configureHighPassFilter(LIS3DH_HPF_AOI_INT1 | LIS3DH_HPF_CLICK, null, LIS3DH_HPF_AUTORESET_ON_INTERRUPT);
 
 // Disable high pass filter
-accel.configureHighPassFilter(LIS3DH.HPF_DISABLED);
+accel.configureHighPassFilter(LIS3DH_HPF_DISABLED);
 ```
 
 ### getDeviceId()
@@ -482,4 +482,4 @@ server.log(format("Device ID: 0x%02X", accel.getDeviceId()));
 
 ## License
 
-The LIS3DH class is licensed under [MIT License](https://github.com/electricimp/lis3dh/blob/master/LICENSE).
+The LIS3DH class is licensed under [MIT License](./LICENSE).

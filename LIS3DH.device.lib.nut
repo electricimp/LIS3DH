@@ -23,74 +23,75 @@
 // THE SOFTWARE.
 
 
+// Registers
+const LIS3DH_TEMP_CFG_REG  = 0x1F;
+const LIS3DH_CTRL_REG1     = 0x20;
+const LIS3DH_CTRL_REG2     = 0x21;
+const LIS3DH_CTRL_REG3     = 0x22;
+const LIS3DH_CTRL_REG4     = 0x23;
+const LIS3DH_CTRL_REG5     = 0x24;
+const LIS3DH_CTRL_REG6     = 0x25;
+const LIS3DH_OUT_X_L_INCR  = 0xA8;
+const LIS3DH_OUT_X_L       = 0x28;
+const LIS3DH_OUT_X_H       = 0x29;
+const LIS3DH_OUT_Y_L       = 0x2A;
+const LIS3DH_OUT_Y_H       = 0x2B;
+const LIS3DH_OUT_Z_L       = 0x2C;
+const LIS3DH_OUT_Z_H       = 0x2D;
+const LIS3DH_FIFO_CTRL_REG = 0x2E;
+const LIS3DH_FIFO_SRC_REG  = 0x2F;
+const LIS3DH_INT1_CFG      = 0x30;
+const LIS3DH_INT1_SRC      = 0x31;
+const LIS3DH_INT1_THS      = 0x32;
+const LIS3DH_INT1_DURATION = 0x33;
+const LIS3DH_CLICK_CFG     = 0x38;
+const LIS3DH_CLICK_SRC     = 0x39;
+const LIS3DH_CLICK_THS     = 0x3A;
+const LIS3DH_TIME_LIMIT    = 0x3B;
+const LIS3DH_TIME_LATENCY  = 0x3C;
+const LIS3DH_TIME_WINDOW   = 0x3D;
+const LIS3DH_WHO_AM_I      = 0x0F;
+    
+
+// Bitfield values
+const LIS3DH_X_LOW         = 0x01;
+const LIS3DH_X_HIGH        = 0x02;
+const LIS3DH_Y_LOW         = 0x04;
+const LIS3DH_Y_HIGH        = 0x08;
+const LIS3DH_Z_LOW         = 0x10;
+const LIS3DH_Z_HIGH        = 0x20;
+const LIS3DH_SIX_D         = 0x40;
+const LIS3DH_AOI           = 0x80;
+
+// High Pass Filter values
+const LIS3DH_HPF_DISABLED               = 0x00;
+const LIS3DH_HPF_AOI_INT1               = 0x01;
+const LIS3DH_HPF_AOI_INT2               = 0x02;
+const LIS3DH_HPF_CLICK                  = 0x04;
+const LIS3DH_HPF_FDS                    = 0x08;
+
+const LIS3DH_HPF_CUTOFF1                = 0x00;
+const LIS3DH_HPF_CUTOFF2                = 0x10;
+const LIS3DH_HPF_CUTOFF3                = 0x20;
+const LIS3DH_HPF_CUTOFF4                = 0x30;
+
+const LIS3DH_HPF_DEFAULT_MODE           = 0x00;
+const LIS3DH_HPF_REFERENCE_SIGNAL       = 0x40;
+const LIS3DH_HPF_NORMAL_MODE            = 0x80;
+const LIS3DH_HPF_AUTORESET_ON_INTERRUPT = 0xC0;
+
+const LIS3DH_FIFO_BYPASS_MODE           = 0x00;
+const LIS3DH_FIFO_FIFO_MODE             = 0x40;
+const LIS3DH_FIFO_STREAM_MODE           = 0x80;
+const LIS3DH_FIFO_STREAM_TO_FIFO_MODE   = 0xC0;
+
+// Click Detection values
+const LIS3DH_SINGLE_CLICK  = 0x15;
+const LIS3DH_DOUBLE_CLICK  = 0x2A;
+
+
 class LIS3DH {
     static VERSION = "2.0.0";
-
-    // Registers
-    static TEMP_CFG_REG  = 0x1F;
-    static CTRL_REG1     = 0x20;
-    static CTRL_REG2     = 0x21;
-    static CTRL_REG3     = 0x22;
-    static CTRL_REG4     = 0x23;
-    static CTRL_REG5     = 0x24;
-    static CTRL_REG6     = 0x25;
-    static OUT_X_L       = 0x28;
-    static OUT_X_H       = 0x29;
-    static OUT_Y_L       = 0x2A;
-    static OUT_Y_H       = 0x2B;
-    static OUT_Z_L       = 0x2C;
-    static OUT_Z_H       = 0x2D;
-    static FIFO_CTRL_REG = 0x2E;
-    static FIFO_SRC_REG  = 0x2F;
-    static INT1_CFG      = 0x30;
-    static INT1_SRC      = 0x31;
-    static INT1_THS      = 0x32;
-    static INT1_DURATION = 0x33;
-    static CLICK_CFG     = 0x38;
-    static CLICK_SRC     = 0x39;
-    static CLICK_THS     = 0x3A;
-    static TIME_LIMIT    = 0x3B;
-    static TIME_LATENCY  = 0x3C;
-    static TIME_WINDOW   = 0x3D;
-    static WHO_AM_I      = 0x0F;
-    static OUT_X_L_INCR  = 0xA8;    
-
-    // bitfield values
-    static X_LOW         = 0x01;
-    static X_HIGH        = 0x02;
-    static Y_LOW         = 0x04;
-    static Y_HIGH        = 0x08;
-    static Z_LOW         = 0x10;
-    static Z_HIGH        = 0x20;
-    static SIX_D         = 0x40;
-    static AOI           = 0x80;
-
-    // High Pass Filter values
-    static HPF_DISABLED  = 0x00;
-    static HPF_AOI_INT1  = 0x01;
-    static HPF_AOI_INT2  = 0x02;
-    static HPF_CLICK      = 0x04;
-    static HPF_FDS       = 0x08;
-
-    static HPF_CUTOFF1 = 0x00;
-    static HPF_CUTOFF2 = 0x10;
-    static HPF_CUTOFF3 = 0x20;
-    static HPF_CUTOFF4 = 0x30;
-
-    static HPF_DEFAULT_MODE = 0x00;
-    static HPF_REFERENCE_SIGNAL = 0x40;
-    static HPF_NORMAL_MODE = 0x80;
-    static HPF_AUTORESET_ON_INTERRUPT = 0xC0;
-    
-    static FIFO_BYPASS_MODE = 0x00;
-    static FIFO_FIFO_MODE = 0x40;
-    static FIFO_STREAM_MODE = 0x80;
-    static FIFO_STREAM_TO_FIFO_MODE = 0xC0;
-
-    // Click Detection values
-    static SINGLE_CLICK  = 0x15;
-    static DOUBLE_CLICK  = 0x2A;
-
 
     // I2C information
     _i2c = null;
@@ -112,22 +113,22 @@ class LIS3DH {
     // (resets to state when first powered on)
     function init() {
         // Set default values for registers
-        _setReg(CTRL_REG1, 0x07);
-        _setReg(CTRL_REG2, 0x00);
-        _setReg(CTRL_REG3, 0x00);
-        _setReg(CTRL_REG4, 0x00);
-        _setReg(CTRL_REG5, 0x00);
-        _setReg(CTRL_REG6, 0x00);
-        _setReg(INT1_CFG, 0x00);
-        _setReg(INT1_THS, 0x00);
-        _setReg(INT1_DURATION, 0x00);
-        _setReg(CLICK_CFG, 0x00);
-        _setReg(CLICK_SRC, 0x00);
-        _setReg(CLICK_THS, 0x00);
-        _setReg(TIME_LIMIT, 0x00);
-        _setReg(TIME_LATENCY, 0x00);
-        _setReg(TIME_WINDOW, 0x00);
-        _setReg(FIFO_CTRL_REG, 0x00);
+        _setReg(LIS3DH_CTRL_REG1, 0x07);
+        _setReg(LIS3DH_CTRL_REG2, 0x00);
+        _setReg(LIS3DH_CTRL_REG3, 0x00);
+        _setReg(LIS3DH_CTRL_REG4, 0x00);
+        _setReg(LIS3DH_CTRL_REG5, 0x00);
+        _setReg(LIS3DH_CTRL_REG6, 0x00);
+        _setReg(LIS3DH_INT1_CFG, 0x00);
+        _setReg(LIS3DH_INT1_THS, 0x00);
+        _setReg(LIS3DH_INT1_DURATION, 0x00);
+        _setReg(LIS3DH_CLICK_CFG, 0x00);
+        _setReg(LIS3DH_CLICK_SRC, 0x00);
+        _setReg(LIS3DH_CLICK_THS, 0x00);
+        _setReg(LIS3DH_TIME_LIMIT, 0x00);
+        _setReg(LIS3DH_TIME_LATENCY, 0x00);
+        _setReg(LIS3DH_TIME_WINDOW, 0x00);
+        _setReg(LIS3DH_FIFO_CTRL_REG, 0x00);
 
         // Read the range + set _range property
         getRange();
@@ -138,21 +139,21 @@ class LIS3DH {
     function getAccel(cb = null) {
         local result = {};
         
-        // Read entire block with auto-increment
-        local reading = _i2c.read(_addr, OUT_X_L_INCR.tochar(), 6);
-        if (reading == null) {
-            throw "I2C read error: " + _i2c.readerror();
+        try {
+            // Read entire block with auto-increment
+            local reading = _getMultiReg(LIS3DH_OUT_X_L_INCR, 6);
+            // Read and sign extend
+            result.x <- ((reading[0] | (reading[1] << 8)) << 16) >> 16;
+            result.y <- ((reading[2] | (reading[3] << 8)) << 16) >> 16;
+            result.z <- ((reading[4] | (reading[5] << 8)) << 16) >> 16;
+
+            // multiply by full-scale range to return in G
+            result.x = (result.x / 32000.0) * _range;
+            result.y = (result.y / 32000.0) * _range;
+            result.z = (result.z / 32000.0) * _range;
+        } catch (e) {
+            reslut.err <- e;
         }
-
-        // Read and sign extend
-        result.x <- ((reading[0] | (reading[1] << 8)) << 16) >> 16;
-        result.y <- ((reading[2] | (reading[3] << 8)) << 16) >> 16;
-        result.z <- ((reading[4] | (reading[5] << 8)) << 16) >> 16;
-
-        // multiply by full-scale range to return in G
-        result.x = (result.x / 32000.0) * _range;
-        result.y = (result.y / 32000.0) * _range;
-        result.z = (result.z / 32000.0) * _range;
 
         // Return table if no callback was passed
         if (cb == null) { return result; }
@@ -163,7 +164,7 @@ class LIS3DH {
 
     // Set Accelerometer Data Rate in Hz
     function setDataRate(rate) {
-        local val = _getReg(CTRL_REG1) & 0x0F;
+        local val = _getReg(LIS3DH_CTRL_REG1) & 0x0F;
         local normal_mode = (val < 8);
         if (rate == 0) {
             // 0b0000 -> power-down mode
@@ -200,13 +201,13 @@ class LIS3DH {
             val = val | 0x90;
             rate = 5000;
         }
-        _setReg(CTRL_REG1, val);
+        _setReg(LIS3DH_CTRL_REG1, val);
         return rate;
     }
 
     // set the full-scale range of the accelerometer (default +/- 2G)
     function setRange(range_a) {
-        local val = _getReg(CTRL_REG4) & 0xCF;
+        local val = _getReg(LIS3DH_CTRL_REG4) & 0xCF;
         local range_bits = 0;
         if (range_a <= 2) {
             range_bits = 0x00;
@@ -221,13 +222,13 @@ class LIS3DH {
             range_bits = 0x03;
             _range = 16;
         }
-        _setReg(CTRL_REG4, val | (range_bits << 4));
+        _setReg(LIS3DH_CTRL_REG4, val | (range_bits << 4));
         return _range;
     }
 
     // get the currently-set full-scale range of the accelerometer
     function getRange() {
-        local range_bits = (_getReg(CTRL_REG4) & 0x30) >> 4;
+        local range_bits = (_getReg(LIS3DH_CTRL_REG4) & 0x30) >> 4;
         if (range_bits == 0x00) {
             _range = 2;
         } else if (range_bits == 0x01) {
@@ -242,38 +243,38 @@ class LIS3DH {
 
     // Enable/disable the accelerometer (all 3-axes)
     function enable(state = true) {
-        // CTRL_REG1 enables/disables accelerometer axes
+        // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
         // bit 0 = X axis
         // bit 1 = Y axis
         // bit 2 = Z axis
-        local val = _getReg(CTRL_REG1);
+        local val = _getReg(LIS3DH_CTRL_REG1);
         if (state) { val = val | 0x07; }
         else { val = val & 0xF8; }
-        _setReg(CTRL_REG1, val);
+        _setReg(LIS3DH_CTRL_REG1, val);
     }
 
     // Enables /disables low power mude
     function setLowPower(state) {
-        _setRegBit(CTRL_REG1, 3, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG1, 3, state ? 1 : 0);
     }
 
     // Returns the deviceID (should be 51)
     function getDeviceId() {
-        return _getReg(WHO_AM_I);
+        return _getReg(LIS3DH_WHO_AM_I);
     }
 
     function configureHighPassFilter(filters, cutoff = null, mode = null) {
         // clear and set filters
-        filters = HPF_DISABLED | filters;
+        filters = LIS3DH_HPF_DISABLED | filters;
 
         // set default cutoff mode
-        if (cutoff == null) { cutoff = HPF_CUTOFF1; }
+        if (cutoff == null) { cutoff = LIS3DH_HPF_CUTOFF1; }
 
         // set default mode
-        if (mode == null) { mode = HPF_DEFAULT_MODE; }
+        if (mode == null) { mode = LIS3DH_HPF_DEFAULT_MODE; }
 
         // set register
-        _setReg(CTRL_REG2, filters | cutoff | mode);
+        _setReg(LIS3DH_CTRL_REG2, filters | cutoff | mode);
     }
 
     //-------------------- INTERRUPTS --------------------//
@@ -282,27 +283,27 @@ class LIS3DH {
     function configureFifoInterrupt(state, fifomode = 0x80, watermark = 28) {
         
         // Enable/disable the FIFO buffer
-        _setRegBit(CTRL_REG5, 6, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG5, 6, state ? 1 : 0);
         
         if (state) {
             // Stream-to-FIFO mode, watermark of [28].
-            _setReg(FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F)); 
+            _setReg(LIS3DH_FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F)); 
         } else {
-            _setReg(FIFO_CTRL_REG, 0x00); 
+            _setReg(LIS3DH_FIFO_CTRL_REG, 0x00); 
         }
         
         // Enable/disable watermark interrupt
-        _setRegBit(CTRL_REG3, 2, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 2, state ? 1 : 0);
         
     }
 
     // Enable/disable and configure inertial interrupts
     function configureInertialInterrupt(state, threshold = 2.0, duration = 5, options = null) {
         // Set default value for options (using statics, so can't set in ftcn declaration)
-        if (options == null) { options = X_HIGH | Y_HIGH | Z_HIGH; }
+        if (options == null) { options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH; }
 
         // Set the enable flag
-        _setRegBit(CTRL_REG3, 6, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 6, state ? 1 : 0);
 
         // If we're disabling the interrupt, don't set anything else
         if (!state) return;
@@ -313,67 +314,67 @@ class LIS3DH {
 
         // Set the threshold
         threshold = (((threshold * 1.0) / (_range * 1.0)) * 127).tointeger();
-        _setReg(INT1_THS, (threshold & 0x7f));
+        _setReg(LIS3DH_INT1_THS, (threshold & 0x7f));
 
         // Set the duration
-        _setReg(INT1_DURATION, duration & 0x7f);
+        _setReg(LIS3DH_INT1_DURATION, duration & 0x7f);
 
         // Set the options flags
-        _setReg(INT1_CFG, options);
+        _setReg(LIS3DH_INT1_CFG, options);
     }
 
     // Enable/disable and configure an inertial interrupt to detect free fall
     function configureFreeFallInterrupt(state, threshold = 0.5, duration = 5) {
-        configureInertialInterrupt(state, threshold, duration, AOI | X_LOW | Y_LOW | Z_LOW);
+        configureInertialInterrupt(state, threshold, duration, LIS3DH_AOI | LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW);
     }
 
     // Enable/disable and configure click interrupts
     function configureClickInterrupt(state, clickType = null, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
         // Set default value for clickType (since we're using statics we can't set in function definition)
-        if (clickType == null) clickType = SINGLE_CLICK;
+        if (clickType == null) clickType = LIS3DH_SINGLE_CLICK;
 
         // Set the enable / disable flag
-        _setRegBit(CTRL_REG3, 7, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 7, state ? 1 : 0);
 
-        // If they disabled the click interrupt, set click_cfg register and return
+        // If they disabled the click interrupt, set LIS3DH_CLICK_CFG register and return
         if (!state) {
-            _setReg(CLICK_CFG, 0x00);
+            _setReg(LIS3DH_CLICK_CFG, 0x00);
             return;
         }
 
-        // Set the CLICK_CFG register
-        _setReg(CLICK_CFG, clickType);
+        // Set the LIS3DH_CLICK_CFG register
+        _setReg(LIS3DH_CLICK_CFG, clickType);
 
-        // Set the CLICK_THS register
+        // Set the LIS3DH_CLICK_THS register
         if (threshold < 0) { threshold = threshold * -1.0; }    // Make sure we have a positive value
         if (threshold > _range) { threshold = _range; }          // Make sure it doesn't exceed the _range
 
         threshold = (((threshold * 1.0) / (_range * 1.0)) * 127).tointeger();
-        _setReg(CLICK_THS, threshold);
+        _setReg(LIS3DH_CLICK_THS, threshold);
 
-        // Set the TIME_LIMIT register (max time for a click)
-        _setReg(TIME_LIMIT, timeLimit);
-        // Set the TIME_LATENCY register (min time between clicks for double click)
-        _setReg(TIME_LATENCY, latency);
-        // Set the TIME_WINDOW register (max time for double click)
-        _setReg(TIME_WINDOW, window);
+        // Set the LIS3DH_TIME_LIMIT register (max time for a click)
+        _setReg(LIS3DH_TIME_LIMIT, timeLimit);
+        // Set the LIS3DH_TIME_LATENCY register (min time between clicks for double click)
+        _setReg(LIS3DH_TIME_LATENCY, latency);
+        // Set the LIS3DH_TIME_WINDOW register (max time for double click)
+        _setReg(LIS3DH_TIME_WINDOW, window);
     }
 
     // Enable/Disable Data Ready Interrupt 1 on Interrupt Pin
     function configureDataReadyInterrupt(state) {
-        _setRegBit(CTRL_REG3, 4, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 4, state ? 1 : 0);
     }
 
     // Enables/disables interrupt latching
     function configureInterruptLatching(state) {
-        _setRegBit(CTRL_REG5, 3, state ? 1 : 0);
-		_setRegBit(CLICK_THS, 7, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG5, 3, state ? 1 : 0);
+		_setRegBit(LIS3DH_CLICK_THS, 7, state ? 1 : 0);
     }
 
-    // Returns interrupt registers as a table, and clears the INT1_SRC register
+    // Returns interrupt registers as a table, and clears the LIS3DH_INT1_SRC register
     function getInterruptTable() {
-        local int1 = _getReg(INT1_SRC);
-        local click = _getReg(CLICK_SRC);
+        local int1 = _getReg(LIS3DH_INT1_SRC);
+        local click = _getReg(LIS3DH_CLICK_SRC);
 
         return {
             "int1":         (int1 & 0x40) != 0,
@@ -390,7 +391,7 @@ class LIS3DH {
     }
     
     function getFifoStats() {
-        local stats = _getReg(FIFO_SRC_REG);
+        local stats = _getReg(LIS3DH_FIFO_SRC_REG);
         return {
             "watermark": (stats & 0x80) != 0,
             "overrun": (stats & 0x40) != 0,
@@ -407,6 +408,15 @@ class LIS3DH {
             throw "I2C read error: " + _i2c.readerror();
         }
         return result[0];
+    }
+
+    function _getMultiReg(reg, numBits) {
+        // Read entire block with auto-increment
+        local result = _i2c.read(_addr, reg.tochar(), numBits);
+        if (result == null) {
+            throw "I2C read error: " + _i2c.readerror();
+        }
+        return result;
     }
 
     function _setReg(reg, val) {
@@ -428,17 +438,17 @@ class LIS3DH {
     }
 
     function dumpRegs() {
-        server.log(format("CTRL_REG1 0x%02X", _getReg(CTRL_REG1)));
-        server.log(format("CTRL_REG2 0x%02X", _getReg(CTRL_REG2)));
-        server.log(format("CTRL_REG3 0x%02X", _getReg(CTRL_REG3)));
-        server.log(format("CTRL_REG4 0x%02X", _getReg(CTRL_REG4)));
-        server.log(format("CTRL_REG5 0x%02X", _getReg(CTRL_REG5)));
-        server.log(format("CTRL_REG6 0x%02X", _getReg(CTRL_REG6)));
-        server.log(format("INT1_DURATION 0x%02X", _getReg(INT1_DURATION)));
-        server.log(format("INT1_CFG 0x%02X", _getReg(INT1_CFG)));
-        server.log(format("INT1_SRC 0x%02X", _getReg(INT1_SRC)));
-        server.log(format("INT1_THS 0x%02X", _getReg(INT1_THS)));
-        server.log(format("FIFO_CTRL_REG 0x%02X", _getReg(FIFO_CTRL_REG)));
-        server.log(format("FIFO_SRC_REG 0x%02X", _getReg(FIFO_SRC_REG)));
+        server.log(format("LIS3DH_CTRL_REG1 0x%02X", _getReg(LIS3DH_CTRL_REG1)));
+        server.log(format("LIS3DH_CTRL_REG2 0x%02X", _getReg(LIS3DH_CTRL_REG2)));
+        server.log(format("LIS3DH_CTRL_REG3 0x%02X", _getReg(LIS3DH_CTRL_REG3)));
+        server.log(format("LIS3DH_CTRL_REG4 0x%02X", _getReg(LIS3DH_CTRL_REG4)));
+        server.log(format("LIS3DH_CTRL_REG5 0x%02X", _getReg(LIS3DH_CTRL_REG5)));
+        server.log(format("LIS3DH_CTRL_REG6 0x%02X", _getReg(LIS3DH_CTRL_REG6)));
+        server.log(format("LIS3DH_INT1_DURATION 0x%02X", _getReg(LIS3DH_INT1_DURATION)));
+        server.log(format("LIS3DH_INT1_CFG 0x%02X", _getReg(LIS3DH_INT1_CFG)));
+        server.log(format("LIS3DH_INT1_SRC 0x%02X", _getReg(LIS3DH_INT1_SRC)));
+        server.log(format("LIS3DH_INT1_THS 0x%02X", _getReg(LIS3DH_INT1_THS)));
+        server.log(format("LIS3DH_FIFO_CTRL_REG 0x%02X", _getReg(LIS3DH_FIFO_CTRL_REG)));
+        server.log(format("LIS3DH_FIFO_SRC_REG 0x%02X", _getReg(LIS3DH_FIFO_SRC_REG)));
     }
 }
