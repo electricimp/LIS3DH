@@ -415,10 +415,10 @@ switch(hardware.wakereason()) {
 
 ### getFifoStats()
 
-This method returns information about the state of the FIFO buffer in a Squirrel table with the following keys.
+This method returns information about the state of the FIFO buffer in a Squirrel table with the following keys:
 
 | Key | Type | Description |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | *watermark* | Boolean | `true` if watermark has been set |
 | *overrun* | Boolean | `true` if data has been overwritten without being read |
 | *empty* | Boolean | `true` if buffer is empty  |
