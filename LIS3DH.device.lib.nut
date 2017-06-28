@@ -89,6 +89,13 @@ const LIS3DH_FIFO_STREAM_TO_FIFO_MODE   = 0xC0;
 const LIS3DH_SINGLE_CLICK  = 0x15;
 const LIS3DH_DOUBLE_CLICK  = 0x2A;
 
+const LIS3DH_MODE_NORMAL = 0x00;
+const LIS3DH_MODE_LOW_POWER = 0x01;
+const LIS3DH_MODE_HIGH_RESOLUTION = 0x02;
+
+const LIS3DH_ADC1 = 0x01;
+const LIS3DH_ADC2 = 0x02;
+const LIS3DH_ADC3 = 0x03;
 
 class LIS3DH {
     static VERSION = "2.0.0";
@@ -96,6 +103,7 @@ class LIS3DH {
     // I2C information
     _i2c = null;
     _addr = null;
+    _mode = LIS3DH_MODE_NORMAL;
 
     // The full-scale range (+/- _range G)
     _range = null;
@@ -107,8 +115,7 @@ class LIS3DH {
         // Read the range + set _range property
         getRange();
     }
-
-
+    
     // set default values for registers, read the current range and set _range
     // (resets to state when first powered on)
     function init() {
@@ -134,6 +141,34 @@ class LIS3DH {
         getRange();
     }
 
+    
+    // Enable the ADC. The ADC sampling frequency is the same as that of the ODR
+    // in LISxDH_CTRL_REG1. The input range is 1200mV plus or minus 400mV and the
+    // data output is expressed in 2's complement left-aligned. The resolution is
+    // 8-bit in low-power mode 10 bits otherwise
+    function enableADC(state) {
+        _setRegBit(LIS3DH_TEMP_CFG_REG, 7, state);
+        _setRegBit(LIS3DH_CTRL_REG4, 7, state);
+    }
+    
+    // This method returns the current value of the ADC line. You must pass one of
+    // the lines (1, 2, or 3) or you will get an invalid return value. You must also
+    // have enabled the ADC by calling enableADC(true)
+    function readADC(ADC_line) {
+        local reg = ADC_line * 2 + 6;
+        local high = _getReg(reg + 1);
+        local low = _getReg(reg);
+        
+        local val = (((low >> 6) | (high << 2)) << 22) >> 22;
+        if(_mode == LIS3DH_MODE_LOW_POWER) {
+            val = (val>>2)/128.0;
+        }
+        else {
+            val = val/512.0;
+        }
+        return 1.3 - val * 0.45;
+    }
+
     // Read data from the Accelerometer
     // Returns a table {x: <data>, y: <data>, z: <data>}
     function getAccel(cb = null) {
@@ -152,7 +187,7 @@ class LIS3DH {
             result.y = (result.y / 32000.0) * _range;
             result.z = (result.z / 32000.0) * _range;
         } catch (e) {
-            reslut.err <- e;
+            result.error <- e;
         }
 
         // Return table if no callback was passed
@@ -205,6 +240,7 @@ class LIS3DH {
         return rate;
     }
 
+
     // set the full-scale range of the accelerometer (default +/- 2G)
     function setRange(range_a) {
         local val = _getReg(LIS3DH_CTRL_REG4) & 0xCF;
@@ -253,9 +289,10 @@ class LIS3DH {
         _setReg(LIS3DH_CTRL_REG1, val);
     }
 
-    // Enables /disables low power mude
-    function setLowPower(state) {
-        _setRegBit(LIS3DH_CTRL_REG1, 3, state ? 1 : 0);
+    function setMode(mode) {
+        _setRegBit(LIS3DH_CTRL_REG1, 3, mode & 0x01);
+        _setRegBit(LIS3DH_CTRL_REG4, 3, mode & 0x02);
+        _mode = mode;
     }
 
     // Returns the deviceID (should be 51)
@@ -263,15 +300,9 @@ class LIS3DH {
         return _getReg(LIS3DH_WHO_AM_I);
     }
 
-    function configureHighPassFilter(filters, cutoff = null, mode = null) {
+    function configureHighPassFilter(filters, cutoff = LIS3DH_HPF_CUTOFF1, mode = LIS3DH_HPF_DEFAULT_MODE) {
         // clear and set filters
         filters = LIS3DH_HPF_DISABLED | filters;
-
-        // set default cutoff mode
-        if (cutoff == null) { cutoff = LIS3DH_HPF_CUTOFF1; }
-
-        // set default mode
-        if (mode == null) { mode = LIS3DH_HPF_DEFAULT_MODE; }
 
         // set register
         _setReg(LIS3DH_CTRL_REG2, filters | cutoff | mode);
@@ -298,9 +329,8 @@ class LIS3DH {
     }
 
     // Enable/disable and configure inertial interrupts
-    function configureInertialInterrupt(state, threshold = 2.0, duration = 5, options = null) {
-        // Set default value for options (using statics, so can't set in ftcn declaration)
-        if (options == null) { options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH; }
+    function configureInertialInterrupt(state, threshold = 2.0, duration = 5, 
+    options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH) {
 
         // Set the enable flag
         _setRegBit(LIS3DH_CTRL_REG3, 6, state ? 1 : 0);
@@ -329,9 +359,7 @@ class LIS3DH {
     }
 
     // Enable/disable and configure click interrupts
-    function configureClickInterrupt(state, clickType = null, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
-        // Set default value for clickType (since we're using statics we can't set in function definition)
-        if (clickType == null) clickType = LIS3DH_SINGLE_CLICK;
+    function configureClickInterrupt(state, clickType = LIS3DH_SINGLE_CLICK, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
 
         // Set the enable / disable flag
         _setRegBit(LIS3DH_CTRL_REG3, 7, state ? 1 : 0);
@@ -368,7 +396,7 @@ class LIS3DH {
     // Enables/disables interrupt latching
     function configureInterruptLatching(state) {
         _setRegBit(LIS3DH_CTRL_REG5, 3, state ? 1 : 0);
-		_setRegBit(LIS3DH_CLICK_THS, 7, state ? 1 : 0);
+        _setRegBit(LIS3DH_CLICK_THS, 7, state ? 1 : 0);
     }
 
     // Returns interrupt registers as a table, and clears the LIS3DH_INT1_SRC register

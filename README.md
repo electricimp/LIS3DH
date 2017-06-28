@@ -48,15 +48,30 @@ server.log(format("Accelerometer running at %dHz", rate));
 // Displays 'Accelerometer running at 100Hz'
 ```
 
-### setLowPower(*state*)
+### setMode(*mode*)
+The *setMode()* method sets the accelerometer into low power, normal, or
+high resolution mode. The method takes one of three parameters:
+LIS3DH_MODE_NORMAL, LIS3DH_MODE_LOW_POWER, or LIS3DH_MODE_HIGH_RESOLUTION.
 
-The *setLowPower()* method configures the device to run in low-power or normal mode. The method takes one boolean parameter, *state*. When *state* is `true`, low-power mode is enabled. When *state* is `false`, normal mode is enabled. Normal mode guarantees high resolution; low-power mode reduces the current consumption. Higher data rates only support specific modes. See *setDataRate()* for details.
+```squirrel
+accel.setMode(LIS3DH_MODE_HIGH_RESOLUTION);
+```
 
-Normal mode is enabled by default.
+### enableADC(*state*)
+The *enableADC()* method enables the three ADC lines available to the LIS3DH
+(NOTE: the LIS2DH does NOT have these auxiliary lines available). Its input
+ranges from approximately 0.9-1.8v. 
+```squirrel
+accel.enableADC(true);
+```
 
-```Squirrel
-// Enable low-power mode
-accel.setLowPower(true);
+### readADC(*ADC_line*)
+The *readADC()* method returns a reading from approximately 0.9-1.8V from the
+specified ADC line (1-3, which can be passed as LIS3DH_ADC1, LIS3DH_ADC2,
+LIS3DH_ADC3). The ADC must first be enabled by calling enableADC(true)
+
+```squirrel
+local reading = accel.readADC(LIS3DH_ADC1);
 ```
 
 ### enable(*[state]*)
