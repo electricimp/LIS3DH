@@ -143,7 +143,7 @@ class LIS3DH {
 
     
     // Enable the ADC. The ADC sampling frequency is the same as that of the ODR
-    // in LISxDH_CTRL_REG1. The input range is 1200mV plus or minus 400mV and the
+    // in LISxDH_CTRL_REG1. The input range is ~0.9-1.72v and the
     // data output is expressed in 2's complement left-aligned. The resolution is
     // 8-bit in low-power mode 10 bits otherwise
     function enableADC(state) {
@@ -166,7 +166,7 @@ class LIS3DH {
         else {
             val = val/512.0;
         }
-        return 1.3 - val * 0.45;
+        return (val -3.16438670695)/(-2.41374622356);
     }
 
     // Read data from the Accelerometer
