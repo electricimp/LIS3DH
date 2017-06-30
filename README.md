@@ -76,7 +76,7 @@ local reading = accel.readADC(LIS3DH_ADC1);
 
 ### enable(*[state]*)
 
-The *enable()* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter, *state*.  By default *state* is set to `true` and the accelerometer is enabled. When *state* is `false`, the accelerometer will be disabled.
+The *enable()* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter, *state*.  By default *state* is set to `true` and the accelerometer is enabled. When *state* is `false`, the accelerometer will be disabled. From startup, axes are by default enabled.
 
 ```squirrel
 function goToSleep() {
