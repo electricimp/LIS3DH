@@ -1,0 +1,14 @@
+{
+    "modelId": "CPXzJPYMWD56" /* ArduCAM Example */,
+    "devices": [
+        "5000d8c46a56cea4" /* 5000d8c46a56cea4 */
+    ],
+    "agentFile": false,
+    "deviceFile": false,
+    "stopOnFailure": false,
+    "timeout": 30,
+    "tests": [
+        "*.test.nut",
+        "tests/**/*.test.nut"
+    ]
+}

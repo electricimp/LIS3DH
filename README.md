@@ -51,7 +51,7 @@ server.log(format("Accelerometer running at %dHz", rate));
 ### setMode(*mode*)
 The *setMode()* method sets the accelerometer into low power, normal, or
 high resolution mode. The method takes one of three parameters:
-LIS3DH_MODE_NORMAL, LIS3DH_MODE_LOW_POWER, or LIS3DH_MODE_HIGH_RESOLUTION.
+LIS3DH_MODE_NORMAL, LIS3DH_MODE_LOW_POWER, or LIS3DH_MODE_HIGH_RESOLUTION. The default mode is normal.
 
 ```squirrel
 accel.setMode(LIS3DH_MODE_HIGH_RESOLUTION);
@@ -60,13 +60,13 @@ accel.setMode(LIS3DH_MODE_HIGH_RESOLUTION);
 ### enableADC(*state*)
 The *enableADC()* method enables the three ADC lines available to the LIS3DH
 (NOTE: the LIS2DH does NOT have these auxiliary lines available). Its input
-ranges from approximately 0.9-1.8v. 
+ranges from approximately 0.8-1.6v. By default, the ADC is disabled.
 ```squirrel
 accel.enableADC(true);
 ```
 
 ### readADC(*ADC_line*)
-The *readADC()* method returns a reading from approximately 0.9-1.8V from the
+The *readADC()* method returns a reading from approximately 0.8-1.6V from the
 specified ADC line (1-3, which can be passed as LIS3DH_ADC1, LIS3DH_ADC2,
 LIS3DH_ADC3). The ADC must first be enabled by calling enableADC(true)
 
@@ -74,7 +74,7 @@ LIS3DH_ADC3). The ADC must first be enabled by calling enableADC(true)
 local reading = accel.readADC(LIS3DH_ADC1);
 ```
 
-### enable(*[state]*)
+### enableAccel(*[state]*)
 
 The *enable()* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter, *state*.  By default *state* is set to `true` and the accelerometer is enabled. When *state* is `false`, the accelerometer will be disabled. From startup, axes are by default enabled.
 

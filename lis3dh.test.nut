@@ -143,7 +143,7 @@ class LIS3DH {
 
     
     // Enable the ADC. The ADC sampling frequency is the same as that of the ODR
-    // in LISxDH_CTRL_REG1. The input range is 0.8-1.6v and the
+    // in LISxDH_CTRL_REG1. The input range is 1200mV plus or minus 400mV and the
     // data output is expressed in 2's complement left-aligned. The resolution is
     // 8-bit in low-power mode 10 bits otherwise
     function enableADC(state) {
@@ -155,22 +155,18 @@ class LIS3DH {
     // the lines (1, 2, or 3) or you will get an invalid return value. You must also
     // have enabled the ADC by calling enableADC(true)
     function readADC(ADC_line) {
-        local reg = (ADC_line * 2) + 6;
-        local read = _getMultiReg(reg, 2);
+        local reg = ADC_line * 2 + 6;
+        local high = _getReg(reg + 1);
+        local low = _getReg(reg);
         
-        local val = (((read[0] >> 6) | (read[1] << 2)) << 22) >> 22;
-        // Low power is only 8-bit resolution so we have to shift to get
-        // 8 bits and then scale appropriately
+        local val = (((low >> 6) | (high << 2)) << 22) >> 22;
         if(_mode == LIS3DH_MODE_LOW_POWER) {
             val = (val>>2)/128.0;
         }
-        // Non low power (high or normal) is 10-bit so we get access
-        // to higher resolution
         else {
             val = val/512.0;
         }
-        // Affine transformation to map to appropriate voltage
-        return (val * 0.4) + 1.2;
+        return 1.35 - val * 0.45;
     }
 
     // Read data from the Accelerometer
@@ -282,7 +278,7 @@ class LIS3DH {
     }
 
     // Enable/disable the accelerometer (all 3-axes)
-    function enableAccel(state = true) {
+    function enable(state = true) {
         // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
         // bit 0 = X axis
         // bit 1 = Y axis
@@ -483,4 +479,46 @@ class LIS3DH {
         server.log(format("LIS3DH_FIFO_CTRL_REG 0x%02X", _getReg(LIS3DH_FIFO_CTRL_REG)));
         server.log(format("LIS3DH_FIFO_SRC_REG 0x%02X", _getReg(LIS3DH_FIFO_SRC_REG)));
     }
+}
+
+class MyTestCase extends ImpTestCase {
+	
+	function getLIS() {
+		local i2c = hardware.i2cJK;
+		i2c.configure(CLOCK_SPEED_400_KHZ);
+		local accel <- LIS3DH(i2c, 0x30);
+		accel.init();
+		accel.setDataRate(100);
+		return accel;
+	}
+
+	function testSetReadRegs() {
+		local myVal = 0x7f; // random value to go into a register
+		local accel = getLIS();
+		accel._setReg(LIS3DH_CTRL_REG3, myVal);
+		this.assertEqual(myVal, accel._getReg(LIS3DH_CTRL_REG3));
+	}
+
+	function testAccel() {
+		local accel = getLIS();
+		local reading = accel.getAccel();
+		this.assertBetween(reading.z, -1.1, -0.9); // for this test, the accelerometer should be sitting still facing up
+	}
+
+	function testADC() {
+		local accel = getLIS();
+		accel.enableADC(true);
+		this.assertBetween(accel.readADC(LIS3DH_ADC1), 1.15, 1.25); // for this test, line 1 of the accelerometer ADC should be fed 1.2V
+	}
+
+	function testInterruptLatching() {
+		local accel = getLIS();
+		accel.configureInterruptLatching(true);
+		accel.configureClickInterrupt(true);
+		accel.configureInertialInterrupt(true);
+
+		imp.sleep(1); // hopefully something gets asserted in this time
+
+		this.assertTrue(accel.getInterruptTable() != 0);
+	}
 }
