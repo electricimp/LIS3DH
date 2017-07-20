@@ -27,13 +27,13 @@ accel <- LIS3DH(i2c, 0x32);
 
 ## Class Methods
 
-### init()
+### reset()
 
-The *init()* method resets all control and interrupt registers to datasheet default values.
+The *reset()* method resets all control and interrupt registers to datasheet default values. This method need only be called to restore registers to these
+default conditions.
 
 ```squirrel
-accel <- LIS3DH(i2c, 0x32);
-accel.init();
+accel.reset();
 ```
 
 ### setDataRate(*rateHz*)

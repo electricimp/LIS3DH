@@ -97,6 +97,9 @@ const LIS3DH_ADC1 = 0x01;
 const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
+const MIDDLE_ADC_VOLTAGE = 1.2;
+const ADC_RANGE = 0.4;
+
 class LIS3DH {
     static VERSION = "2.0.0";
 
@@ -116,9 +119,9 @@ class LIS3DH {
         getRange();
     }
     
-    // set default values for registers, read the current range and set _range
+    // Set default values for registers, read the current range and set _range
     // (resets to state when first powered on)
-    function init() {
+    function reset() {
         // Set default values for registers
         _setReg(LIS3DH_CTRL_REG1, 0x07);
         _setReg(LIS3DH_CTRL_REG2, 0x00);
@@ -141,7 +144,6 @@ class LIS3DH {
         getRange();
     }
 
-    
     // Enable the ADC. The ADC sampling frequency is the same as that of the ODR
     // in LISxDH_CTRL_REG1. The input range is 0.8-1.6v and the
     // data output is expressed in 2's complement left-aligned. The resolution is
@@ -158,17 +160,11 @@ class LIS3DH {
         local reg = (ADC_line * 2) + 6;
         local read = _getMultiReg(reg, 2);
         
+        // Shift and sign extend
         local val = (((read[0] >> 6) | (read[1] << 2)) << 22) >> 22;
-        // Low power is only 8-bit resolution so we have to shift to get
-        // 8 bits and then scale appropriately
-        if(_mode == LIS3DH_MODE_LOW_POWER) {
-            val = (val>>2)/128.0;
-        }
-        // Non low power (high or normal) is 10-bit so we get access
-        // to higher resolution
-        else {
-            val = val/512.0;
-        }
+        
+        val = val / 512.0; // In low-power mode, there will be lower resolution
+
         // Affine transformation to map to appropriate voltage
         return (val * 0.4) + 1.2;
     }
@@ -204,7 +200,7 @@ class LIS3DH {
     // Set Accelerometer Data Rate in Hz
     function setDataRate(rate) {
         local val = _getReg(LIS3DH_CTRL_REG1) & 0x0F;
-        local normal_mode = (val < 8);
+        local normalMode = (val < 8);
         if (rate == 0) {
             // 0b0000 -> power-down mode
             // we've already ANDed-out the top 4 bits; just write back
@@ -230,7 +226,7 @@ class LIS3DH {
         } else if (rate <= 400) {
             val = val | 0x70;
             rate = 400;
-        } else if (normal_mode) {
+        } else if (normalMode) {
             val = val | 0x90;
             rate = 1250;
         } else if (rate <= 1600) {
@@ -243,7 +239,6 @@ class LIS3DH {
         _setReg(LIS3DH_CTRL_REG1, val);
         return rate;
     }
-
 
     // set the full-scale range of the accelerometer (default +/- 2G)
     function setRange(range_a) {
@@ -281,8 +276,8 @@ class LIS3DH {
         return _range;
     }
 
-    // Enable/disable the accelerometer (all 3-axes)
-    function enableAccel(state = true) {
+    // Set the state of the accelerometer axes
+    function _setAccel(state = true) {
         // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
         // bit 0 = X axis
         // bit 1 = Y axis
@@ -291,6 +286,16 @@ class LIS3DH {
         if (state) { val = val | 0x07; }
         else { val = val & 0xF8; }
         _setReg(LIS3DH_CTRL_REG1, val);
+    }
+
+    // Enable all 3 axes on the accelerometer
+    function enableAccel() {
+        _setAccel(true);
+    }
+
+    // Disable all 3 axes on the accelerometer
+    function disableAccel() {
+        _setAccel(false);
     }
 
     function setMode(mode) {
@@ -315,10 +320,10 @@ class LIS3DH {
     //-------------------- INTERRUPTS --------------------//
 
     // Enable/disable and configure FIFO buffer watermark interrupts
-    function configureFifoInterrupt(state, fifomode = 0x80, watermark = 28) {
+    function configureFifoInterrupt(enable, fifomode = 0x80, watermark = 28) {
         
         // Enable/disable the FIFO buffer
-        _setRegBit(LIS3DH_CTRL_REG5, 6, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG5, 6, enable ? 1 : 0);
         
         if (state) {
             // Stream-to-FIFO mode, watermark of [28].
@@ -347,7 +352,7 @@ class LIS3DH {
         if (threshold > _range) { threshold = _range; }          // Make sure it doesn't exceed the _range
 
         // Set the threshold
-        threshold = (((threshold * 1.0) / (_range * 1.0)) * 127).tointeger();
+        threshold = (((threshold * 1.0) / (_range)) * 127).tointeger();
         _setReg(LIS3DH_INT1_THS, (threshold & 0x7f));
 
         // Set the duration
@@ -358,15 +363,15 @@ class LIS3DH {
     }
 
     // Enable/disable and configure an inertial interrupt to detect free fall
-    function configureFreeFallInterrupt(state, threshold = 0.5, duration = 5) {
-        configureInertialInterrupt(state, threshold, duration, LIS3DH_AOI | LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW);
+    function configureFreeFallInterrupt(enable, threshold = 0.5, duration = 5) {
+        configureInertialInterrupt(enable, threshold, duration, LIS3DH_AOI | LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW);
     }
 
     // Enable/disable and configure click interrupts
-    function configureClickInterrupt(state, clickType = LIS3DH_SINGLE_CLICK, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
+    function configureClickInterrupt(enable, clickType = LIS3DH_SINGLE_CLICK, threshold = 1.1, timeLimit = 5, latency = 10, window = 50) {
 
         // Set the enable / disable flag
-        _setRegBit(LIS3DH_CTRL_REG3, 7, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 7, enable ? 1 : 0);
 
         // If they disabled the click interrupt, set LIS3DH_CLICK_CFG register and return
         if (!state) {
@@ -381,7 +386,7 @@ class LIS3DH {
         if (threshold < 0) { threshold = threshold * -1.0; }    // Make sure we have a positive value
         if (threshold > _range) { threshold = _range; }          // Make sure it doesn't exceed the _range
 
-        threshold = (((threshold * 1.0) / (_range * 1.0)) * 127).tointeger();
+        threshold = (((threshold * 1.0) / (_range)) * 127).tointeger();
         _setReg(LIS3DH_CLICK_THS, threshold);
 
         // Set the LIS3DH_TIME_LIMIT register (max time for a click)
@@ -393,14 +398,14 @@ class LIS3DH {
     }
 
     // Enable/Disable Data Ready Interrupt 1 on Interrupt Pin
-    function configureDataReadyInterrupt(state) {
-        _setRegBit(LIS3DH_CTRL_REG3, 4, state ? 1 : 0);
+    function configureDataReadyInterrupt(enable) {
+        _setRegBit(LIS3DH_CTRL_REG3, 4, enable ? 1 : 0);
     }
 
     // Enables/disables interrupt latching
-    function configureInterruptLatching(state) {
-        _setRegBit(LIS3DH_CTRL_REG5, 3, state ? 1 : 0);
-        _setRegBit(LIS3DH_CLICK_THS, 7, state ? 1 : 0);
+    function configureInterruptLatching(enable) {
+        _setRegBit(LIS3DH_CTRL_REG5, 3, enable ? 1 : 0);
+        _setRegBit(LIS3DH_CLICK_THS, 7, enable ? 1 : 0);
     }
 
     // Returns interrupt registers as a table, and clears the LIS3DH_INT1_SRC register
@@ -431,7 +436,6 @@ class LIS3DH {
             "unread": (stats & 0x1F) + ((stats & 0x40) ? 1 : 0) 
         }
     }
-
 
     //-------------------- PRIVATE METHODS --------------------//
     function _getReg(reg) {
