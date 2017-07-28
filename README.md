@@ -2,7 +2,7 @@
 
 The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a 3-Axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it.
 
-The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
+The LIS3DH can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
 **To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.0"` **to the top of your device code**
 
@@ -74,16 +74,26 @@ LIS3DH_ADC3). The ADC must first be enabled by calling enableADC(true)
 local reading = accel.readADC(LIS3DH_ADC1);
 ```
 
-### enableAccel(*[state]*)
+### enableAccel()
 
-The *enable()* method enables or disables all three axes on the accelerometer. The method takes an optional boolean parameter, *state*.  By default *state* is set to `true` and the accelerometer is enabled. When *state* is `false`, the accelerometer will be disabled. From startup, axes are by default enabled.
+The *enableAccel()* method enables all three axes on the accelerometer. From startup, axes are by default enabled.
+
+```squirrel
+accel.enableAccel();
+accel.setDataRate(100);
+local reading = accel.getAccel();
+```
+
+### disableAccel()
+
+The *disableAccel()* method disables all three axes on the accelerometer.
 
 ```squirrel
 function goToSleep() {
     imp.onidle(function() {
         // Set data rate to 0 and disable the accelerometer to save power
         accel.setDataRate(0);
-        accel.enable(false);
+        accel.disableAccel(false);
 
         // Sleep for 1 hour
         server.sleepfor(3600);
@@ -118,9 +128,9 @@ accel.getAccel(function(val) {
 });
 ```
 
-### setRange(*range*)
+### setRange(*rangeA*)
 
-The *setRange()* method sets the measurement range of the sensor in Gs. Supported ranges are (&plusmn;) 2, 4, 8 and 16G. The data rate will be rounded up to the closest supported range and the actual range will be returned.
+The *setRange(rangeA)* method sets the measurement range of the sensor in Gs. Supported ranges are (&plusmn;) 2, 4, 8 and 16G. The data rate will be rounded up to the closest supported range and the actual range will be returned.
 
 The default measurement range is &plusmn;2G.
 
@@ -202,13 +212,13 @@ accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
 | *LIS3DH_FIFO_STREAM_MODE*  | When full, the FIFO buffer discards the older data as the new arrive |
 | *LIS3DH_FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive.<br>Once trigger event occurs, the FIFO buffer starts operating in FIFO mode |
 
-### configureInertialInterrupt(*state[, threshold][, duration][, options]*)
+### configureInertialInterrupt(*enable[, threshold][, duration][, options]*)
 
 This method configures the inertial interrupt generator:
 
 | Parameter | Type | Default Value | Description |
 | --------- | ---- | ------------- | ----------- |
-| *state*     | Boolean | N/A | `true` to enable, `false` to disable |
+| *enable*     | Boolean | N/A | `true` to enable, `false` to disable |
 | *threshold* | Float   | 2.0 | Inertial interrupts threshold in Gs |
 | *duration*  | Integer | 5 | Number of samples exceeding threshold<br>required to generate interrupt |
 | *options* | bitfield | *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH* | See table below |
@@ -247,9 +257,9 @@ The following is taken from the from [LIS3DH Datasheet](http://www.st.com/st-web
 
 **Direction Recognition (11)** An interrupt is generate when orientation is inside a known zone. The interrupt signal stay until orientation is inside the zone.
 
-### configureFreeFallInterrupt(*state[, threshold][, duration]*)
+### configureFreeFallInterrupt(*enable[, threshold][, duration]*)
 
-The *configureFreeFallInterrupt()* method configures the intertial interrupt generator to generate interrupts when the device is in free fall (acceleration on all axis appraoches 0). The default *threshold* is 0.5G.The default *duration* is five samples.
+The *configureFreeFallInterrupt(enable[, threshold][, duration])* method configures the intertial interrupt generator to generate interrupts when the device is in free fall (acceleration on all axis appraoches 0). The default *threshold* is 0.5G.The default *duration* is five samples.
 
 ```squirrel
 accel.configureFreeFallInterrupt(true);
@@ -257,13 +267,13 @@ accel.configureFreeFallInterrupt(true);
 
 **Note** This method will overwrite any settings configured with the *configureInertialInterrupt()*.
 
-### configureClickInterrupt(*state[, clickType][, threshold][, timeLimit][, latency][, window]*)
+### configureClickInterrupt(*enable[, clickType][, threshold][, timeLimit][, latency][, window]*)
 
 Configures the click interrupt generator:
 
 | Parameter | Type | Default Value | Description |
 | --- | --- | --- | --- |
-| *state*     | Boolean | N/A | `true` to enable, `false` to disable |
+| *enable*     | Boolean | N/A | `true` to enable, `false` to disable |
 | *clickType* | Constant | *LIS3DH_SINGLE_CLICK* | *LIS3DH_SINGLE_CLICK* or *LIS3DH_DOUBLE_CLICK* |
 | *threshold* | Float | 1.1 | Threshold that must be exceeded to be considered a click |
 | *timeLimit* | Float | 5 | Max time in *ms* the acceleration can spend above the threshold to be considered a click |
@@ -284,18 +294,18 @@ accel.configureClickInterrupt(true, LIS3DH_SINGLE_CLICK);
 accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
 ```
 
-### configureDataReadyInterrupt(*state*)
+### configureDataReadyInterrupt(*enable*)
 
-Enables (*state* is `true`) or disables (*state* is `false`) data-ready interrupts on the INT1 line. The data-ready signal rises to 1 when a new set of acceleration data has been generated and it is available for reading. The interrupt is reset when the higher part of the data of all the enabled channels has been read.
+Enables (*enable* is `true`) or disables (*enable* is `false`) data-ready interrupts on the INT1 line. The data-ready signal rises to 1 when a new set of acceleration data has been generated and it is available for reading. The interrupt is reset when the higher part of the data of all the enabled channels has been read.
 
 ```squirrel
 accel.setDataRate(1); // 1 Hz
 accel.configureDataReadyInterrupt(true);
 ```
 
-### configureInterruptLatching(*state*)
+### configureInterruptLatching(*enable*)
 
-Enables (*state* is `true`) or disables (*state* is `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
+Enables (*enable* is `true`) or disables (*enable* is `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
 
 Interrupt latching is disabled by default.
 

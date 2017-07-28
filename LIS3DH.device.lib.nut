@@ -241,23 +241,23 @@ class LIS3DH {
     }
 
     // set the full-scale range of the accelerometer (default +/- 2G)
-    function setRange(range_a) {
+    function setRange(rangeA) {
         local val = _getReg(LIS3DH_CTRL_REG4) & 0xCF;
-        local range_bits = 0;
-        if (range_a <= 2) {
-            range_bits = 0x00;
+        local rangeBits = 0;
+        if (rangeA <= 2) {
+            rangeBits = 0x00;
             _range = 2;
-        } else if (range_a <= 4) {
-            range_bits = 0x01;
+        } else if (rangeA <= 4) {
+            rangeBits = 0x01;
             _range = 4;
-        } else if (range_a <= 8) {
-            range_bits = 0x02;
+        } else if (rangeA <= 8) {
+            rangeBits = 0x02;
             _range = 8;
         } else {
-            range_bits = 0x03;
+            rangeBits = 0x03;
             _range = 16;
         }
-        _setReg(LIS3DH_CTRL_REG4, val | (range_bits << 4));
+        _setReg(LIS3DH_CTRL_REG4, val | (rangeBits << 4));
         return _range;
     }
 
@@ -276,18 +276,6 @@ class LIS3DH {
         return _range;
     }
 
-    // Set the state of the accelerometer axes
-    function _setAccel(state = true) {
-        // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
-        // bit 0 = X axis
-        // bit 1 = Y axis
-        // bit 2 = Z axis
-        local val = _getReg(LIS3DH_CTRL_REG1);
-        if (state) { val = val | 0x07; }
-        else { val = val & 0xF8; }
-        _setReg(LIS3DH_CTRL_REG1, val);
-    }
-
     // Enable all 3 axes on the accelerometer
     function enableAccel() {
         _setAccel(true);
@@ -298,6 +286,8 @@ class LIS3DH {
         _setAccel(false);
     }
 
+    // Set the mode of the accelerometer by passing a constant (LIS3DH_MODE_NORMAL, 
+    // LIS3DH_MODE_LOW_POWER, LIS3DH_MODE_HIGH_RESOLUTION)
     function setMode(mode) {
         _setRegBit(LIS3DH_CTRL_REG1, 3, mode & 0x01);
         _setRegBit(LIS3DH_CTRL_REG4, 3, mode & 0x02);
@@ -338,14 +328,14 @@ class LIS3DH {
     }
 
     // Enable/disable and configure inertial interrupts
-    function configureInertialInterrupt(state, threshold = 2.0, duration = 5, 
+    function configureInertialInterrupt(enable, threshold = 2.0, duration = 5, 
     options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH) {
 
         // Set the enable flag
-        _setRegBit(LIS3DH_CTRL_REG3, 6, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 6, enable ? 1 : 0);
 
         // If we're disabling the interrupt, don't set anything else
-        if (!state) return;
+        if (!enable) return;
 
         // Clamp the threshold
         if (threshold < 0) { threshold = threshold * -1.0; }    // Make sure we have a positive value
@@ -438,6 +428,19 @@ class LIS3DH {
     }
 
     //-------------------- PRIVATE METHODS --------------------//
+
+    // Set the state of the accelerometer axes
+    function _setAccel(state = true) {
+        // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
+        // bit 0 = X axis
+        // bit 1 = Y axis
+        // bit 2 = Z axis
+        local val = _getReg(LIS3DH_CTRL_REG1);
+        if (state) { val = val | 0x07; }
+        else { val = val & 0xF8; }
+        _setReg(LIS3DH_CTRL_REG1, val);
+    }
+
     function _getReg(reg) {
         local result = _i2c.read(_addr, reg.tochar(), 1);
         if (result == null) {
@@ -473,7 +476,7 @@ class LIS3DH {
         return _setReg(reg, val);
     }
 
-    function dumpRegs() {
+    function _dumpRegs() {
         server.log(format("LIS3DH_CTRL_REG1 0x%02X", _getReg(LIS3DH_CTRL_REG1)));
         server.log(format("LIS3DH_CTRL_REG2 0x%02X", _getReg(LIS3DH_CTRL_REG2)));
         server.log(format("LIS3DH_CTRL_REG3 0x%02X", _getReg(LIS3DH_CTRL_REG3)));
