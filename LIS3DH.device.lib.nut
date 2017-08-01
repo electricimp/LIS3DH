@@ -51,7 +51,7 @@ const LIS3DH_TIME_LIMIT    = 0x3B;
 const LIS3DH_TIME_LATENCY  = 0x3C;
 const LIS3DH_TIME_WINDOW   = 0x3D;
 const LIS3DH_WHO_AM_I      = 0x0F;
-    
+
 
 // Bitfield values
 const LIS3DH_X_LOW         = 0x01;
@@ -118,7 +118,7 @@ class LIS3DH {
         // Read the range + set _range property
         getRange();
     }
-    
+
     // Set default values for registers, read the current range and set _range
     // (resets to state when first powered on)
     function reset() {
@@ -152,17 +152,17 @@ class LIS3DH {
         _setRegBit(LIS3DH_TEMP_CFG_REG, 7, state);
         _setRegBit(LIS3DH_CTRL_REG4, 7, state);
     }
-    
+
     // This method returns the current value of the ADC line. You must pass one of
     // the lines (1, 2, or 3) or you will get an invalid return value. You must also
     // have enabled the ADC by calling enableADC(true)
     function readADC(ADC_line) {
         local reg = (ADC_line * 2) + 6;
         local read = _getMultiReg(reg, 2);
-        
+
         // Shift and sign extend
         local val = (((read[0] >> 6) | (read[1] << 2)) << 22) >> 22;
-        
+
         val = val / 512.0; // In low-power mode, there will be lower resolution
 
         // Affine transformation to map to appropriate voltage
@@ -173,7 +173,7 @@ class LIS3DH {
     // Returns a table {x: <data>, y: <data>, z: <data>}
     function getAccel(cb = null) {
         local result = {};
-        
+
         try {
             // Read entire block with auto-increment
             local reading = _getMultiReg(LIS3DH_OUT_X_L_INCR, 6);
@@ -276,17 +276,7 @@ class LIS3DH {
         return _range;
     }
 
-    // Enable all 3 axes on the accelerometer
-    function enableAccel() {
-        _setAccel(true);
-    }
-
-    // Disable all 3 axes on the accelerometer
-    function disableAccel() {
-        _setAccel(false);
-    }
-
-    // Set the mode of the accelerometer by passing a constant (LIS3DH_MODE_NORMAL, 
+    // Set the mode of the accelerometer by passing a constant (LIS3DH_MODE_NORMAL,
     // LIS3DH_MODE_LOW_POWER, LIS3DH_MODE_HIGH_RESOLUTION)
     function setMode(mode) {
         _setRegBit(LIS3DH_CTRL_REG1, 3, mode & 0x01);
@@ -311,24 +301,24 @@ class LIS3DH {
 
     // Enable/disable and configure FIFO buffer watermark interrupts
     function configureFifoInterrupt(enable, fifomode = 0x80, watermark = 28) {
-        
+
         // Enable/disable the FIFO buffer
         _setRegBit(LIS3DH_CTRL_REG5, 6, enable ? 1 : 0);
-        
+
         if (state) {
             // Stream-to-FIFO mode, watermark of [28].
-            _setReg(LIS3DH_FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F)); 
+            _setReg(LIS3DH_FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F));
         } else {
-            _setReg(LIS3DH_FIFO_CTRL_REG, 0x00); 
+            _setReg(LIS3DH_FIFO_CTRL_REG, 0x00);
         }
-        
+
         // Enable/disable watermark interrupt
         _setRegBit(LIS3DH_CTRL_REG3, 2, state ? 1 : 0);
-        
+
     }
 
     // Enable/disable and configure inertial interrupts
-    function configureInertialInterrupt(enable, threshold = 2.0, duration = 5, 
+    function configureInertialInterrupt(enable, threshold = 2.0, duration = 5,
     options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH) {
 
         // Set the enable flag
@@ -416,21 +406,19 @@ class LIS3DH {
             "doubleClick":  (click & 0x20) != 0
         }
     }
-    
+
     function getFifoStats() {
         local stats = _getReg(LIS3DH_FIFO_SRC_REG);
         return {
             "watermark": (stats & 0x80) != 0,
             "overrun": (stats & 0x40) != 0,
             "empty": (stats & 0x20) != 0,
-            "unread": (stats & 0x1F) + ((stats & 0x40) ? 1 : 0) 
+            "unread": (stats & 0x1F) + ((stats & 0x40) ? 1 : 0)
         }
     }
 
-    //-------------------- PRIVATE METHODS --------------------//
-
     // Set the state of the accelerometer axes
-    function _setAccel(state = true) {
+    function enable(state = true) {
         // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
         // bit 0 = X axis
         // bit 1 = Y axis
@@ -440,6 +428,8 @@ class LIS3DH {
         else { val = val & 0xF8; }
         _setReg(LIS3DH_CTRL_REG1, val);
     }
+
+    //-------------------- PRIVATE METHODS --------------------//
 
     function _getReg(reg) {
         local result = _i2c.read(_addr, reg.tochar(), 1);
