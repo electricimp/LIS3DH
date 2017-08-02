@@ -343,7 +343,7 @@ class LIS3DH {
     }
 
     // Enable/disable and configure an inertial interrupt to detect free fall
-    function configureFreeFallInterrupt(enable, threshd = 0.5, duration = 5) {
+    function configureFreeFallInterrupt(enable, threshold = 0.5, duration = 5) {
         configureInertialInterrupt(enable, threshold, duration, LIS3DH_AOI | LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW);
     }
 
