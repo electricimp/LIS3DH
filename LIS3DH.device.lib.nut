@@ -353,7 +353,7 @@ class LIS3DH {
     }
 
     // Enable/disable and configure an inertial interrupt to detect free fall
-    function configureFreeFallInterrupt(enable, threshold = 0.5, duration = 5) {
+    function configureFreeFallInterrupt(enable, threshd = 0.5, duration = 5) {
         configureInertialInterrupt(enable, threshold, duration, LIS3DH_AOI | LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW);
     }
 
@@ -364,7 +364,7 @@ class LIS3DH {
         _setRegBit(LIS3DH_CTRL_REG3, 7, enable ? 1 : 0);
 
         // If they disabled the click interrupt, set LIS3DH_CLICK_CFG register and return
-        if (!state) {
+        if (!enable) {
             _setReg(LIS3DH_CLICK_CFG, 0x00);
             return;
         }
