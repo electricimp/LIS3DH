@@ -74,26 +74,19 @@ LIS3DH_ADC3). The ADC must first be enabled by calling enableADC(true)
 local reading = accel.readADC(LIS3DH_ADC1);
 ```
 
-### enableAccel()
+### enable(*[state]*)
 
-The *enableAccel()* method enables all three axes on the accelerometer. From startup, axes are by default enabled.
-
-```squirrel
-accel.enableAccel();
-accel.setDataRate(100);
-local reading = accel.getAccel();
-```
-
-### disableAccel()
-
-The *disableAccel()* method disables all three axes on the accelerometer.
+The *enable()* method enables or disables all three axes on the accelerometer.
+The method takes an optional boolean parameter, *state*.
+By default *state* is set to `true` and the accelerometer is enabled.
+When *state* is `false`, the accelerometer will be disabled.
 
 ```squirrel
 function goToSleep() {
     imp.onidle(function() {
         // Set data rate to 0 and disable the accelerometer to save power
         accel.setDataRate(0);
-        accel.disableAccel(false);
+        accel.enable(false);
 
         // Sleep for 1 hour
         server.sleepfor(3600);
@@ -164,9 +157,9 @@ the buffer whenever the watermark is reached:
 ```squirrel
 // Function to read from FIFO buffer
 function readBuffer() {
-    
+
     if (wakePin.read() == 0) return;
-    
+
     // Read buffer
     local stats = accel.getFifoStats();
     for (local i = 0 ; i < stats.unread ; ++i) {
@@ -174,11 +167,11 @@ function readBuffer() {
         server.log(format("Accel (x,y,z): [%d, %d, %d]", data.x, data.y, data.z));
     }
 
-    // Check if we are now overrun        
+    // Check if we are now overrun
     local stats = accel.getFifoStats();
     if (stats.overrun) {
         server.error("Accelerometer buffer overrun");
-        
+
         // Set FIFO mode to bypass to clear the buffer and then return to stream mode
         accel.configureFifoInterrupt(true, LIS3DH_FIFO_BYPASS_MODE);
         accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
@@ -204,7 +197,7 @@ accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
 ```
 
 #### FIFO modes
-    
+
 | Mode | Description |
 | ---- | ----------- |
 | *LIS3DH_FIFO_BYPASS_MODE*  | Disables the FIFO buffer (only the first address is used for each channel) |
