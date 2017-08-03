@@ -25,47 +25,70 @@
 @include "github:electricimp/LIS3DH/LIS3DH.device.lib.nut@develop"
 
 class MyTestCase extends ImpTestCase {
-	
-    _i2c = hardware.i2c89;
-    _intPin = hardware.pin1;
 
-	function getLIS() {
-		_i2c.configure(CLOCK_SPEED_400_KHZ);
-		local accel = LIS3DH(_i2c, 0x32);
-		accel.reset();
-		accel.setDataRate(100);
-		return accel;
-	}
+    @include __PATH__+"/myFile.nut"
 
-	function testSetReadRegs() {
-		local myVal = 0x7f; // random value to go into a register
-		local accel = getLIS();
-		accel._setReg(LIS3DH_CTRL_REG3, myVal);
-		this.assertEqual(myVal, accel._getReg(LIS3DH_CTRL_REG3));
-	}
+    static MANUAL_ACTION_TIMEOUT = 6;
+    static DATA_WAIT = 1;
 
-	function testAccel() {
-		local accel = getLIS();
-		local reading = accel.getAccel();
-		this.assertBetween(reading.z, 0.9, 1.1); // for this test, the accelerometer should be sitting still facing up
-	}
+    _i2c = null;
+    _intPin = null;
 
-	function testADC() {
-		local accel = getLIS();
-		accel.enableADC(true);
-		this.assertBetween(accel.readADC(LIS3DH_ADC1), 1.15, 1.25); // for this test, line 1 of the accelerometer ADC should be fed 1.2V
-	}
+    function getLIS() {
+        local accel = LIS3DH(_i2c, 0x32);
+        accel.reset();
+        accel.setDataRate(100);
+        return accel;
+    }
 
-	function testInterruptLatching() {
-		local accel = getLIS();
-		accel.configureInterruptLatching(true);
-		accel.configureClickInterrupt(true);
-		accel.configureInertialInterrupt(true);
+    function testSetReadRegs() {
+        local myVal = 0x7f; // random value to go into a register
+        local accel = getLIS();
+        accel._setReg(LIS3DH_CTRL_REG3, myVal);
+        this.assertEqual(myVal, accel._getReg(LIS3DH_CTRL_REG3));
+    }
 
-		imp.sleep(1); // hopefully something gets asserted in this time
+    function testAccel() {
+        this.info(format("please face the accelerometer up within %d seconds so that it experiences approximately 1g on its z-axis", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                local reading = accel.getAccel().z;
+                if (reading >= 0.9 && reading <= 1.1) {
+                    resolve("correctly read approximately 1g on the z-axis");
+                } else {
+                    reject("received incorrect z-axis reading");
+                }
+            }.bindenv(this));
+        }.bindenv(this));
+    }
 
-		this.assertTrue(accel.getInterruptTable() != 0);
-	}
+    function testADC() {
+        this.info(format("please set the voltage to ADC channel 1 to 1.2V within %d seconds", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enableADC(true);
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                local reading = accel.readADC(LIS3DH_ADC1);
+                if (reading >= 1.15 && reading <= 1.25) {
+                    resolve("ADC correctly read approximately 1.2V on channel 1");
+                } else {
+                    reject("ADC did not receive correct reading on channel 1");
+                }
+            }.bindenv(this));
+        }.bindenv(this));        
+    }
+
+    function testInterruptLatching() {
+        local accel = getLIS();
+        accel.configureInterruptLatching(true);
+        accel.configureClickInterrupt(true);
+        accel.configureInertialInterrupt(true);
+
+        imp.sleep(DATA_WAIT); // hopefully something gets asserted in this time
+
+        this.assertTrue(accel.getInterruptTable() != 0);
+    }
 
     function testConstruction() {
         local accel = LIS3DH(_i2c, 0x32);
@@ -83,17 +106,17 @@ class MyTestCase extends ImpTestCase {
         local val = false;
         _intPin.configure(DIGITAL_IN, function() {
             val = _intPin.read();
-            }.bindenv(this));
+        }.bindenv(this));
         return Promise(function(resolve, reject) {
             accel.reset();
             val = false; // if reset does not reset interrupt and range, then intPin
             // will be asserted and therefore val will become true bfeore
             // the wakeup callback
-            imp.wakeup(2, function() {
+            imp.wakeup(DATA_WAIT, function() {
                 if (val || (accel.getRange() != 2)) {
-                    reject("did not reset data ready interrupt");
+                    reject("did not reset data ready interrupt and/or range");
                 } else {
-                    resolve("rejected data ready interrupt via reset");
+                    resolve("rejected data ready interrupt and reset range via reset");
                 }
             }.bindenv(this));
         }.bindenv(this));
@@ -116,8 +139,8 @@ class MyTestCase extends ImpTestCase {
         local accel = getLIS();
         local res = accel.getAccel();
         this.assertTrue(("x" in res ? typeof res.x == "float" : false) &&
-            ("y" in res ? typeof res.y == "float" : false) && 
-            ("z" in res ? typeof res.z == "float" : false));
+                        ("y" in res ? typeof res.y == "float" : false) && 
+                        ("z" in res ? typeof res.z == "float" : false));
     }
 
     function testGetAccelAsync() {
@@ -125,8 +148,8 @@ class MyTestCase extends ImpTestCase {
             local accel = getLIS();
             accel.getAccel(function(res) {
                 if (("x" in res ? typeof res.x == "float" : false) &&
-            ("y" in res ? typeof res.y == "float" : false) && 
-            ("z" in res ? typeof res.z == "float" : false)) {
+                    ("y" in res ? typeof res.y == "float" : false) && 
+                    ("z" in res ? typeof res.z == "float" : false)) {
                     resolve("async resolved successfully");
                 } else {
                     reject("async did not resolve succesfully");
@@ -139,13 +162,13 @@ class MyTestCase extends ImpTestCase {
         return Promise(function(resolve, reject) {
             local accel = getLIS();
             accel.enable(false);
-            imp.wakeup(1, function() {
+            imp.wakeup(DATA_WAIT, function() {
                 local res = accel.getAccel();
                 if (res.x || res.y || res.z) {
                     reject("failed to disable axes");
                 } else {
-                	accel.enable(true);
-                    imp.wakeup(1, function() {
+                    accel.enable(true);
+                    imp.wakeup(DATA_WAIT, function() {
                         res = accel.getAccel();
                         // technically it's possible to have all axes at 0 
                         // acceleration but it's unlikedly
@@ -161,220 +184,220 @@ class MyTestCase extends ImpTestCase {
     }
 
     function testX() {
-    	this.info("move the device around in the x direction for this test");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		imp.wakeup(5, function() {
-    			reject("no x readings detected");
-    		}.bindenv(this));
-    		for(local i = 0; i < 100; ++i) {
-    			imp.wakeup(5.0*i/100, function() {
-    				if(math.abs(accel.getAccel().x) > 0.1) {
-    					resolve("x reading detected");
-    				}
-    			}.bindenv(this));
-    		}
-    	}.bindenv(this));
+        this.info("move the device around in the x direction for this test");
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject("no x readings detected");
+            }.bindenv(this));
+            for(local i = 0; i < 100; ++i) {
+                imp.wakeup(MANUAL_ACTION_TIMEOUT.tofloat()*i/100, function() {
+                    if(math.abs(accel.getAccel().x) > 0.1) {
+                        resolve("x reading detected");
+                    }
+                }.bindenv(this));
+            }
+        }.bindenv(this));
     }
 
     function testY() {
-    	this.info("move the device around in the y direction for this test");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		imp.wakeup(5, function() {
-    			reject("no y readings detected");
-    		}.bindenv(this));
-    		for(local i = 0; i < 100; ++i) {
-    			imp.wakeup(5.0*i/100, function() {
-    				if(math.abs(accel.getAccel().y) > 0.1) {
-    					resolve("y reading detected");
-    				}
-    			}.bindenv(this));
-    		}
-    	}.bindenv(this));
+        this.info("move the device around in the y direction for this test");
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject("no y readings detected");
+            }.bindenv(this));
+            for(local i = 0; i < 100; ++i) {
+                imp.wakeup(MANUAL_ACTION_TIMEOUT.tofloat()*i/100, function() {
+                    if(math.abs(accel.getAccel().y) > 0.1) {
+                        resolve("y reading detected");
+                    }
+                }.bindenv(this));
+            }
+        }.bindenv(this));
     }
 
     function testZ() {
-    	this.info("move the device around in the z direction for this test");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		imp.wakeup(5, function() {
-    			reject("no z readings detected");
-    		}.bindenv(this));
-    		for(local i = 0; i < 100; ++i) {
-    			imp.wakeup(5.0*i/100, function() {
-    				if(math.abs(accel.getAccel().z) > 0.1) {
-    					resolve("z reading detected");
-    				}
-    			}.bindenv(this));
-    		}
-    	}.bindenv(this));
+        this.info("move the device around in the z direction for this test");
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject("no z readings detected");
+            }.bindenv(this));
+            for(local i = 0; i < 100; ++i) {
+                imp.wakeup(MANUAL_ACTION_TIMEOUT.tofloat()*i/100, function() {
+                    if(math.abs(accel.getAccel().z) > 0.1) {
+                        resolve("z reading detected");
+                    }
+                }.bindenv(this));
+            }
+        }.bindenv(this));
     }
 
     function testXHighInterrupt() {
-    	this.info("move the device so that it experiences a positive x acceleration");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("interrupt received");
-    		}.bindenv(this))
-    		imp.wakeup(5, function() {
-    			reject("no interrupt detected within 5 seconds");
-    		}.bindenv(this));
-    		accel.configureInertialInterrupt(true, 1, 5, LIS3DH_X_HIGH);
-    	}.bindenv(this));
+        this.info(format("move the device within %d seconds so that it experiences a positive x acceleration", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("interrupt received");
+            }.bindenv(this))
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("no interrupt detected within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+            accel.configureInertialInterrupt(true, 1, 5, LIS3DH_X_HIGH);
+        }.bindenv(this));
     }
 
     function testYHighInterrupt() {
-    	this.info("move the device so that it experiences a positive y acceleration");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("interrupt received");
-    		}.bindenv(this))
-    		imp.wakeup(5, function() {
-    			reject("no interrupt detected within 5 seconds");
-    		}.bindenv(this));
-    		accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Y_HIGH);
-    	}.bindenv(this));
+        this.info(format("move the device within %d seconds so that it experiences a positive y acceleration", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("interrupt received");
+            }.bindenv(this))
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("no interrupt detected within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+            accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Y_HIGH);
+        }.bindenv(this));
     }
 
     function testZHighInterrupt() {
-    	this.info("move the device so that it experiences a positive z acceleration");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("interrupt received");
-    		}.bindenv(this))
-    		imp.wakeup(5, function() {
-    			reject("no interrupt detected within 5 seconds");
-    		}.bindenv(this));
-    		accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Z_HIGH);
-    	}.bindenv(this));
+        this.info(format("move the device within %d seconds so that it experiences a positive z acceleration", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("interrupt received");
+            }.bindenv(this))
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("no interrupt detected within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+            accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Z_HIGH);
+        }.bindenv(this));
     }
 
     function testXLowInterrupt() {
-    	this.info("move the device so that it experiences a low x acceleration");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("interrupt received");
-    		}.bindenv(this))
-    		imp.wakeup(5, function() {
-    			reject("no interrupt detected within 5 seconds");
-    		}.bindenv(this));
-    		accel.configureInertialInterrupt(true, 1, 5, LIS3DH_X_LOW);
-    	}.bindenv(this));
+        this.info(format("move the device within %d seconds so that it experiences a negative x acceleration", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("interrupt received");
+            }.bindenv(this))
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("no interrupt detected within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+            accel.configureInertialInterrupt(true, 1, 5, LIS3DH_X_LOW);
+        }.bindenv(this));
     }
 
     function testYLowInterrupt() {
-    	this.info("move the device so that it experiences a low y acceleration");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("interrupt received");
-    		}.bindenv(this))
-    		imp.wakeup(5, function() {
-    			reject("no interrupt detected within 5 seconds");
-    		}.bindenv(this));
-    		accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Y_LOW);
-    	}.bindenv(this));
+        this.info(format("move the device within %d seconds so that it experiences a negative y acceleration", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("interrupt received");
+            }.bindenv(this))
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("no interrupt detected within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+            accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Y_LOW);
+        }.bindenv(this));
     }
 
     function testZLowInterrupt() {
-    	this.info("move the device so that it experiences a low z acceleration");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.enable(true);
-    		accel.setDataRate(100);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("interrupt received");
-    		}.bindenv(this))
-    		imp.wakeup(5, function() {
-    			reject("no interrupt detected within 5 seconds");
-    		}.bindenv(this));
-    		accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Z_LOW);
-    	}.bindenv(this));
+        this.info(format("move the device within %d seconds so that it experiences a negative z acceleration", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.enable(true);
+            accel.setDataRate(100);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("interrupt received");
+            }.bindenv(this))
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("no interrupt detected within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+            accel.configureInertialInterrupt(true, 1, 5, LIS3DH_Z_LOW);
+        }.bindenv(this));
     }
 
     function testDisableInterrupt() {
-    	this.info("try to trigger an interrupt by clicking, shaking, etc.");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.configureInertialInterrupt(true);
-    		accel.configureClickInterrupt(true);
-    		accel.setDataRate(10);
-    		accel.configureDataReadyInterrupt(true);
-    		accel.reset(); // this should have disabled interrupts
-    		_intPin.configure(DIGITAL_IN, function() {
-    			reject("received interrupt when they were disabled");
-    		}.bindenv(this));
-    		imp.wakeup(5, function() {
-    			resolve("no interrupts received after disabling");
-    		}.bindenv(this));
-    	}.bindenv(this));
+        this.info("try to trigger an interrupt by clicking, shaking, etc.");
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.configureInertialInterrupt(true);
+            accel.configureClickInterrupt(true);
+            accel.setDataRate(10);
+            accel.configureDataReadyInterrupt(true);
+            accel.reset(); // this should have disabled interrupts
+            _intPin.configure(DIGITAL_IN, function() {
+                reject("received interrupt when they were disabled");
+            }.bindenv(this));
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                resolve("no interrupts received after disabling");
+            }.bindenv(this));
+        }.bindenv(this));
     }
 
     function testSingleClick() {
-    	this.info("please tap the accelerometer to test click interrupts");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.configureClickInterrupt(true, LIS3DH_SINGLE_CLICK);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			if(accel.getInterruptTable().singleClick) {
-    				resolve("received single click interrupt");
-    			}
-    		}.bindenv(this));
-    		imp.wakeup(5, function() {
-    			reject("did not receive single click within 5 seconds");
-    		}.bindenv(this));
-    	}.bindenv(this));
+        this.info(format("please tap the accelerometer within %d seconds to test click interrupts", MANUAL_ACTION_TIMEOUT));
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.configureClickInterrupt(true, LIS3DH_SINGLE_CLICK);
+            _intPin.configure(DIGITAL_IN, function() {
+                if(accel.getInterruptTable().singleClick) {
+                    resolve("received single click interrupt");
+                }
+            }.bindenv(this));
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("did not receive single click within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+        }.bindenv(this));
     }
 
     function testDoubleClick() {
-    	this.info("please double tap the accelerometer to test double click interrupts");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			if(accel.getInterruptTable().doubleClick) {
-    				resolve("received double click interrupt");
-    			}
-    		}.bindenv(this));
-    		imp.wakeup(5, function() {
-    			reject("did not receive double click within 5 seconds");
-    		}.bindenv(this));
-    	}.bindenv(this));
+        this.info("please double tap the accelerometer within %d seconds to test double click interrupts");
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
+            _intPin.configure(DIGITAL_IN, function() {
+                if(accel.getInterruptTable().doubleClick) {
+                    resolve("received double click interrupt");
+                }
+            }.bindenv(this));
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("did not receive double click within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+        }.bindenv(this));
     }
 
     function testFreeFallInterrupt() {
-    	this.info("please toss the device in the air to test free fall interrupts");
-    	return Promise(function(resolve, reject) {
-    		local accel = getLIS();
-    		accel.configureFreeFallInterrupt(true);
-    		_intPin.configure(DIGITAL_IN, function() {
-    			resolve("received free fall interrupt");
-    		}.bindenv(this));
-    		imp.wakeup(8, function() {
-    			reject("did not receive free fall interrupt within 8 seconds");
-    		}.bindenv(this));
-    	}.bindenv(this));
+        this.info("please toss the device in the air within %d seconds to test free fall interrupts");
+        return Promise(function(resolve, reject) {
+            local accel = getLIS();
+            accel.configureFreeFallInterrupt(true);
+            _intPin.configure(DIGITAL_IN, function() {
+                resolve("received free fall interrupt");
+            }.bindenv(this));
+            imp.wakeup(MANUAL_ACTION_TIMEOUT, function() {
+                reject(format("did not receive free fall interrupt within %d seconds", MANUAL_ACTION_TIMEOUT));
+            }.bindenv(this));
+        }.bindenv(this));
     }
 
 }
