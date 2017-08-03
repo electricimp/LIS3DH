@@ -1,5 +1,7 @@
 # LIS3DH 3-Axis Accelerometer
 
+[![Build Status](https://api.travis-ci.org/electricimp/LIS3DH.svg?branch=master)](https://travis-ci.org/electricimp/LIS3DH)
+
 The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a 3-Axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it.
 
 The LPS25H can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
