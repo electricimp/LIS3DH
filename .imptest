@@ -4,7 +4,7 @@
         "23c0ffde573f06ee" /* 23c0ffde573f06ee */
     ],
     "agentFile": false,
-    "deviceFile": false,
+    "deviceFile": "LIS3DH.device.lib.nut",
     "stopOnFailure": false,
     "timeout": 30,
     "tests": [

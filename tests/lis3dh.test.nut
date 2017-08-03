@@ -22,8 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@include "github:electricimp/LIS3DH/LIS3DH.device.lib.nut@develop"
-
 class MyTestCase extends ImpTestCase {
 
     @include __PATH__+"/myFile.nut"
