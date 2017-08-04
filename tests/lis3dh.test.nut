@@ -24,13 +24,17 @@
 
 class MyTestCase extends ImpTestCase {
 
-    @include __PATH__+"/myFile.nut"
-
     static MANUAL_ACTION_TIMEOUT = 6;
     static DATA_WAIT = 1;
 
     _i2c = null;
     _intPin = null;
+
+    function setUp() {
+        _i2c = hardware.i2c89;
+        _i2c.configure(CLOCK_SPEED_400_KHZ);
+        _intPin = hardware.pin1;
+    }
 
     function getLIS() {
         local accel = LIS3DH(_i2c, 0x32);
