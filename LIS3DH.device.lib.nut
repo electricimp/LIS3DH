@@ -97,9 +97,6 @@ const LIS3DH_ADC1 = 0x01;
 const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
-const MIDDLE_ADC_VOLTAGE = 1.2;
-const ADC_RANGE = 0.4;
-
 class LIS3DH {
     static VERSION = "2.0.0";
 
