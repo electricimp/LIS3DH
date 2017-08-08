@@ -447,7 +447,7 @@ This method configures the high-pass filter.
 #### Filters
 
 | Filter Constant | Description |
-| ------ | --------- |
+| --- | --- |
 | *LIS3DH_HPF_AOI_INT1* | High-pass filter enabled for AOI function on interrupt 1 |
 | *LIS3DH_HPF_AOI_INT2* | High-pass filter enabled for AOI function on interrupt 2 |
 | *LIS3DH_HPF_CLICK* | High-pass filter enabled for CLICK function |
@@ -456,7 +456,7 @@ This method configures the high-pass filter.
 
 #### High-pass Filter Cut-off Frequencies
 
-| Cut-off Constant | f@1Hz | f@10Hz | f@25Hz | f@50Hz | f@100Hz | f@200Hz | f@400Hz | f@1.6kHz | f@5kHz |
+| Cut-off Constant | f@1Hz | f@10Hz | f@25Hz | f@50Hz | f@100Hz | f@200Hz | f@400Hz | f@1600Hz | f@5000Hz |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | *LIS3DH_HPF_CUTOFF1* | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
 | *LIS3DH_HPF_CUTOFF2* | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
@@ -466,7 +466,7 @@ This method configures the high-pass filter.
 #### Modes
 
 | Mode Constant | Description |
-| ------ | --------- |
+| --- | --- |
 | *LIS3DH_HPF_DEFAULT_MODE* | Normal mode (reset reading *HP_RESET_FILTER*) |
 | *LIS3DH_HPF_REFERENCE_SIGNAL* | Reference signal for filtering |
 | *LIS3DH_HPF_NORMAL_MODE* | Normal mode |
