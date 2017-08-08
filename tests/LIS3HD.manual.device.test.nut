@@ -24,7 +24,7 @@
 
 class MyTestCase extends ImpTestCase {
 
-    static MANUAL_ACTION_TIMEOUT = 6;
+    static MANUAL_ACTION_TIMEOUT = 15;
     static DATA_WAIT = 1;
 
     _i2c = null;
@@ -65,6 +65,8 @@ class MyTestCase extends ImpTestCase {
         }.bindenv(this));
     }
 
+    /*
+    // TODO: Disable it for now as LIS2DH doesn't have ADC
     function testADC() {
         this.info(format("please set the voltage to ADC channel 1 to 1.2V within %d seconds", MANUAL_ACTION_TIMEOUT));
         return Promise(function(resolve, reject) {
@@ -80,6 +82,7 @@ class MyTestCase extends ImpTestCase {
             }.bindenv(this));
         }.bindenv(this));        
     }
+    */
 
     function testInterruptLatching() {
         local accel = getLIS();
@@ -373,7 +376,7 @@ class MyTestCase extends ImpTestCase {
     }
 
     function testDoubleClick() {
-        this.info("please double tap the accelerometer within %d seconds to test double click interrupts");
+        this.info(format("please double tap the accelerometer within %d seconds to test double click interrupts", MANUAL_ACTION_TIMEOUT));
         return Promise(function(resolve, reject) {
             local accel = getLIS();
             accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
@@ -389,7 +392,7 @@ class MyTestCase extends ImpTestCase {
     }
 
     function testFreeFallInterrupt() {
-        this.info("please toss the device in the air within %d seconds to test free fall interrupts");
+        this.info(format("please toss the device in the air within %d seconds to test free fall interrupts", MANUAL_ACTION_TIMEOUT));
         return Promise(function(resolve, reject) {
             local accel = getLIS();
             accel.configureFreeFallInterrupt(true);
