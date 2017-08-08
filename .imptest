@@ -8,6 +8,7 @@
     "stopOnFailure": false,
     "timeout": 30,
     "tests": [
-       "tests/**/*automated.test.nut"
+        "*.test.nut",
+        "tests/**/*.test.nut"
     ]
 }
