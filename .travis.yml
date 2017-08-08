@@ -7,4 +7,4 @@ before_script:
   - npm i -g imptest@latest
 
 script:
-  - imptest test
+  - imptest test tests/LIS3HD.automated.device.test.nut
