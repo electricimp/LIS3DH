@@ -34,6 +34,11 @@ class MyTestCase extends ImpTestCase {
         _i2c = hardware.i2c89;
         _i2c.configure(CLOCK_SPEED_400_KHZ);
         _intPin = hardware.pin1;
+
+        // Software reset for pressure sensor
+        _i2c.write(0xB8, format("%c%c", 0x11, (0x14 & 0xff)));
+        // Disable TempHumid Interrupt
+        _i2c.write(0xBE, format("%c%c", 0x22, (0x00 & 0xff)));
     }
 
     function getLIS() {
@@ -404,5 +409,11 @@ class MyTestCase extends ImpTestCase {
             }.bindenv(this));
         }.bindenv(this));
     }
+
+    function tearDown() {
+        local accel = LIS3DH(_i2c, 0x32);
+        accel.reset();
+    }
+
 
 }
