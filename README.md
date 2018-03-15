@@ -8,7 +8,7 @@ This library also supports the LIS2DH12, another widely used three-axis MEMS acc
 
 The LIS3DH can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
-**To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.0"` **to the top of your device code**
+**To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.1"` **to the top of your device code**
 
 ## Class Usage
 
