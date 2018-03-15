@@ -98,7 +98,7 @@ const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
 class LIS3DH {
-    static VERSION = "2.0.0";
+    static VERSION = "2.0.1";
 
     // I2C information
     _i2c = null;
