@@ -98,7 +98,7 @@ const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
 class LIS3DH {
-    static VERSION = "2.0.0";
+    static VERSION = "2.0.1";
 
     // I2C information
     _i2c = null;
@@ -302,7 +302,7 @@ class LIS3DH {
         // Enable/disable the FIFO buffer
         _setRegBit(LIS3DH_CTRL_REG5, 6, enable ? 1 : 0);
 
-        if (state) {
+        if (enable) {
             // Stream-to-FIFO mode, watermark of [28].
             _setReg(LIS3DH_FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F));
         } else {
@@ -310,7 +310,7 @@ class LIS3DH {
         }
 
         // Enable/disable watermark interrupt
-        _setRegBit(LIS3DH_CTRL_REG3, 2, state ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG3, 2, enable ? 1 : 0);
 
     }
 
