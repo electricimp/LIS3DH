@@ -64,7 +64,7 @@ class MyTestCase extends ImpTestCase {
                 if (reading >= 0.9 && reading <= 1.1) {
                     resolve("correctly read approximately 1g on the z-axis");
                 } else {
-                    reject("received incorrect z-axis reading");
+                    reject("received incorrect z-axis reading: " + reading);
                 }
             }.bindenv(this));
         }.bindenv(this));
