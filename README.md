@@ -171,12 +171,6 @@ This method reads the latest measurement from the accelerometer. It takes an opt
 
 Table &mdash; the latest reading from the accelerometer as values to the keys *x*, *y* and *z*. **Note** if *getAccel()* is called with an argument, it will return nothing.
 
-```
-{ "x": <xData>,
-  "y": <yData>,
-  "z": <zData> }
-```
-
 #### Synchronous Example ####
 
 ```squirrel
@@ -240,10 +234,6 @@ This method configures an interrupt when the FIFO buffer reaches the set waterma
 | *fifomode* | Bitfield | No | See table below (Default: *LIS3DH_FIFO_STREAM_MODE*) |
 | *watermark* | Integer | No | Number of buffer slots filled to generate interrupt (buffer has 32 slots; default: 28) |
 
-#### Return Value ####
-
-Nothing. 
-
 #### FIFO Modes ####
 
 | Mode | Description |
@@ -252,6 +242,10 @@ Nothing.
 | *LIS3DH_FIFO_FIFO_MODE* | When full, the FIFO buffer stops collecting data from the input channels |
 | *LIS3DH_FIFO_STREAM_MODE* | When full, the FIFO buffer discards the older data as the new arrive |
 | *LIS3DH_FIFO_STREAM_TO_FIFO_MODE* | When full, the FIFO buffer discards the older data as the new arrive. Once trigger event occurs, the FIFO buffer starts operating in FIFO mode |
+
+#### Return Value ####
+
+Nothing. 
 
 #### Example ####
 
@@ -309,10 +303,6 @@ This method configures the inertial interrupt generator.
 | *duration* | Integer | No | Number of samples exceeding threshold<br>required to generate interrupt (Default: 5) |
 | *options* | Bitfield | No | See table below (Default: *X_HIGH* \| *Y_HIGH* \| *Z_HIGH*) |
 
-#### Return Value ####
-
-Nothing. 
-
 The default configuration for the Intertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 2G. This behavior can be changed by OR-ing together any of the following flags:
 
 | Flag | Description |
@@ -341,6 +331,10 @@ The following is taken from the from [LIS3DH Datasheet](http://www.st.com/st-web
 
 **Direction Recognition (11)** An interrupt is generate when orientation is inside a known zone. The interrupt signal stay until orientation is inside the zone.
 
+#### Return Value ####
+
+Nothing. 
+
 #### Example ####
 
 ```squirrel
@@ -359,7 +353,7 @@ This method configures the intertial interrupt generator to generate interrupts 
 | --- | --- | --- | --- |
 | *state* | Boolean | Yes | The interrupt state: `true` to enable, `false` to disable |
 | *threshold* | Float | No | Inertial interrupts threshold in Gs (Default: 0.5) |
-| *duration* | Integer | No | Number of samples exceeding threshold<br>required to generate interrupt (Default: 5) |
+| *duration* | Integer | No | Number of samples exceeding threshold required to generate interrupt (Default: 5) |
 
 #### Return Value ####
 
@@ -593,7 +587,7 @@ This method returns information about the state of the FIFO buffer.
 Table &mdash; the FIFO buffer state:
 
 | Key | Type | Description |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | *watermark* | Boolean | `true` if watermark has been set |
 | *overrun* | Boolean | `true` if data has been overwritten without being read |
 | *empty* | Boolean | `true` if buffer is empty |
