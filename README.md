@@ -287,7 +287,7 @@ accel.setDataRate(100);
 
 // Configure the FIFO buffer in Stream Mode and set interrupt generator
 // to generate an interrupt when there are 30 entries in the buffer
-accel.configureFifoInterrupt(true, accel.FIFO_STREAM_MODE, 30);
+accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
 ```
 
 ### configureInertialInterrupt(*state[, threshold][, duration][, options]*) ####
@@ -376,11 +376,11 @@ This method configures the click interrupt generator.
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
 | *state* | Boolean | Yes | The interrupt state: `true` to enable, `false` to disable |
-| *clickType* | Integer | No | *LIS3DH.SINGLE_CLICK* or *LIS3DH.DOUBLE_CLICK* (Default: *LIS3DH.SINGLE_CLICK*) |
+| *clickType* | Integer | No | *LIS3DH_SINGLE_CLICK* or *LIS3DH_DOUBLE_CLICK* (Default: *LIS3DH_SINGLE_CLICK*) |
 | *threshold* | Float | No | Inertial interrupts threshold in Gs (Default: 1.1) |
 | *timeLimit* | Float | No | Maximum time in milliseconds the acceleration can spend above the threshold to be considered a click (Default: 5) |
-| *latency* | Float | No | Minimum time in milliseconds between the end of one click event and the start of another to be considered a *LIS3DH.DOUBLE_CLICK* (Default: 10) |
-| *window* | Float | o | Maximum time in milliseconds between the start of one click event and end of another to be considered a *LIS3DH.DOUBLE_CLICK* (Default: 50) |
+| *latency* | Float | No | Minimum time in milliseconds between the end of one click event and the start of another to be considered a *LIS3DH_DOUBLE_CLICK* (Default: 10) |
+| *window* | Float | o | Maximum time in milliseconds between the start of one click event and end of another to be considered a *LIS3DH_DOUBLE_CLICK* (Default: 50) |
 
 #### Return Value ####
 
@@ -390,14 +390,14 @@ Nothing.
 
 ```squirrel
 // Configure a single click interrupt
-accel.configureClickInterrupt(true, LIS3DH.SINGLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH_SINGLE_CLICK);
 ```
 
 #### Double Click Example ####
 
 ```squirrel
 // configure a double click interrupt
-accel.configureClickInterrupt(true, LIS3DH.DOUBLE_CLICK);
+accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
 ```
 
 ### configureDataReadyInterrupt(*state*) ###
@@ -505,7 +505,7 @@ function sensorSetup() {
 
 // Put imp to Sleep
 function sleep(timer) {
-  server.log("gGoing to sleep for " + timer + " sec");
+  server.log("Going to sleep for " + timer + " sec");
   if (server.isconnected()) {
     imp.onidle(function() {
       server.sleepfor(timer);
