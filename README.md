@@ -301,7 +301,7 @@ This method configures the inertial interrupt generator.
 | *state* | Boolean | Yes | The interrupt state: `true` to enable, `false` to disable |
 | *threshold* | Float | No | Inertial interrupts threshold in Gs (Default: 2.0) |
 | *duration* | Integer | No | Number of samples exceeding threshold<br>required to generate interrupt (Default: 5) |
-| *options* | Bitfield | No | See table below (Default: *X_HIGH* \| *Y_HIGH* \| *Z_HIGH*) |
+| *options* | Bitfield | No | See table below (Default: *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH*) |
 
 The default configuration for the Intertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 2G. This behavior can be changed by OR-ing together any of the following flags:
 
@@ -310,7 +310,7 @@ The default configuration for the Intertial Interrupt generator is to generate a
 | *LIS3DH_X_LOW*  | Generates an interrupt when the x-axis acceleration goes below the threshold |
 | *LIS3DH_X_HIGH* | Generates an interrupt when the x-axis acceleration goes above the threshold |
 | *LIS3DH_Y_LOW*  | Generates an interrupt when the y-axis acceleration goes below the threshold |
-| *YLIS3DH__HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
+| *LIS3DH_Y_HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
 | *LIS3DH_Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
 | *LIS3DH_Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
 | *LIS3DH_AOI*    | Sets the AOI flag *(see ‘Inertial Interrupt Modes’ below)* |
