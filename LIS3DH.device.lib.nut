@@ -24,14 +24,14 @@
 
 
 // Registers
-const LIS3DH_TEMP_CFG_REG  = 0x1F;
-const LIS3DH_CTRL_REG1     = 0x20;
-const LIS3DH_CTRL_REG2     = 0x21;
-const LIS3DH_CTRL_REG3     = 0x22;
-const LIS3DH_CTRL_REG4     = 0x23;
-const LIS3DH_CTRL_REG5     = 0x24;
-const LIS3DH_CTRL_REG6     = 0x25;
-const LIS3DH_OUT_X_L_INCR  = 0xA8;
+const LIS3DH_TEMP_CFG_REG  = 0x1F; // Enable temp/ADC
+const LIS3DH_CTRL_REG1     = 0x20; // Data rate, normal/low power mode, enable xyz axis
+const LIS3DH_CTRL_REG2     = 0x21; // HPF config
+const LIS3DH_CTRL_REG3     = 0x22; // Int1 interrupt type enable/disable
+const LIS3DH_CTRL_REG4     = 0x23; // BDU, endian data sel, range, high res mode, self test, SPI 3 or 4 wire
+const LIS3DH_CTRL_REG5     = 0x24; // boot, FIFO enable, latch int1 & int2, 4D enable int1 & int2 with 6D bit set
+const LIS3DH_CTRL_REG6     = 0x25; // int2 interrupt settings, set polarity of int1 and int2 pins
+const LIS3DH_OUT_X_L_INCR  = 0xA8; //
 const LIS3DH_OUT_X_L       = 0x28;
 const LIS3DH_OUT_X_H       = 0x29;
 const LIS3DH_OUT_Y_L       = 0x2A;
@@ -98,7 +98,7 @@ const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
 class LIS3DH {
-    static VERSION = "2.0.1";
+    static VERSION = "2.0.2";
 
     // I2C information
     _i2c = null;
@@ -123,7 +123,7 @@ class LIS3DH {
         _setReg(LIS3DH_CTRL_REG1, 0x07);
         _setReg(LIS3DH_CTRL_REG2, 0x00);
         _setReg(LIS3DH_CTRL_REG3, 0x00);
-        _setReg(LIS3DH_CTRL_REG4, 0x00);
+        _setReg(LIS3DH_CTRL_REG4, 0x00); // Sets range to default
         _setReg(LIS3DH_CTRL_REG5, 0x00);
         _setReg(LIS3DH_CTRL_REG6, 0x00);
         _setReg(LIS3DH_INT1_CFG, 0x00);
@@ -136,8 +136,9 @@ class LIS3DH {
         _setReg(LIS3DH_TIME_LATENCY, 0x00);
         _setReg(LIS3DH_TIME_WINDOW, 0x00);
         _setReg(LIS3DH_FIFO_CTRL_REG, 0x00);
+        _setReg(LIS3DH_TEMP_CFG_REG, 0x00);
 
-        // Read the range + set _range property
+        // Reads the default range from register and + sets local _range property
         getRange();
     }
 
@@ -360,11 +361,12 @@ class LIS3DH {
         _setReg(LIS3DH_CLICK_CFG, clickType);
 
         // Set the LIS3DH_CLICK_THS register
+        local latchedBit = _getReg(LIS3DH_CLICK_THS) & 0x80;    // Get LIR_Click bit
         if (threshold < 0) { threshold = threshold * -1.0; }    // Make sure we have a positive value
-        if (threshold > _range) { threshold = _range; }          // Make sure it doesn't exceed the _range
+        if (threshold > _range) { threshold = _range; }         // Make sure it doesn't exceed the _range
 
         threshold = (((threshold * 1.0) / (_range)) * 127).tointeger();
-        _setReg(LIS3DH_CLICK_THS, threshold);
+        _setReg(LIS3DH_CLICK_THS, latchedBit | (threshold & 0x7F));
 
         // Set the LIS3DH_TIME_LIMIT register (max time for a click)
         _setReg(LIS3DH_TIME_LIMIT, timeLimit);
@@ -408,9 +410,9 @@ class LIS3DH {
         local stats = _getReg(LIS3DH_FIFO_SRC_REG);
         return {
             "watermark": (stats & 0x80) != 0,
-            "overrun": (stats & 0x40) != 0,
-            "empty": (stats & 0x20) != 0,
-            "unread": (stats & 0x1F) + ((stats & 0x40) ? 1 : 0)
+            "overrun"  : (stats & 0x40) != 0,
+            "empty"    : (stats & 0x20) != 0,
+            "unread"   : (stats & 0x1F) + ((stats & 0x40) ? 1 : 0)
         }
     }
 

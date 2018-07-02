@@ -85,7 +85,7 @@ class MyTestCase extends ImpTestCase {
                     reject("ADC did not receive correct reading on channel 1");
                 }
             }.bindenv(this));
-        }.bindenv(this));        
+        }.bindenv(this));
     }
     */
 
@@ -105,7 +105,7 @@ class MyTestCase extends ImpTestCase {
         this.assertTrue(accel._addr == 0x32);
     }
 
-    // test that calling reset correctly resets registers (in particular, 
+    // test that calling reset correctly resets registers (in particular,
     // data ready interrupt and range)
     function testInit() {
         local accel = LIS3DH(_i2c, 0x32);
@@ -149,7 +149,7 @@ class MyTestCase extends ImpTestCase {
         local accel = getLIS();
         local res = accel.getAccel();
         this.assertTrue(("x" in res ? typeof res.x == "float" : false) &&
-                        ("y" in res ? typeof res.y == "float" : false) && 
+                        ("y" in res ? typeof res.y == "float" : false) &&
                         ("z" in res ? typeof res.z == "float" : false));
     }
 
@@ -158,7 +158,7 @@ class MyTestCase extends ImpTestCase {
             local accel = getLIS();
             accel.getAccel(function(res) {
                 if (("x" in res ? typeof res.x == "float" : false) &&
-                    ("y" in res ? typeof res.y == "float" : false) && 
+                    ("y" in res ? typeof res.y == "float" : false) &&
                     ("z" in res ? typeof res.z == "float" : false)) {
                     resolve("async resolved successfully");
                 } else {
@@ -180,7 +180,7 @@ class MyTestCase extends ImpTestCase {
                     accel.enable(true);
                     imp.wakeup(DATA_WAIT, function() {
                         res = accel.getAccel();
-                        // technically it's possible to have all axes at 0 
+                        // technically it's possible to have all axes at 0
                         // acceleration but it's unlikedly
                         if (!(res.x || res.y || res.z)) {
                             reject("failed to enable axes");
@@ -188,7 +188,7 @@ class MyTestCase extends ImpTestCase {
                             resolve("successfully disabled and enabled axes");
                         }
                     }.bindenv(this));
-                }   
+                }
             }.bindenv(this));
         }.bindenv(this))
     }

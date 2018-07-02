@@ -5,8 +5,8 @@
   "allowDisconnect": false,
   "builderCache": false,
   "testFiles": [
-    "*.test.nut",
-    "tests/**/*.test.nut"
+    "LIS3DH.automated.device.test.nut",
+    "tests/**/LIS3DH.automated.device.test.nut"
   ],
   "deviceFile": "LIS3DH.device.lib.nut"
 }
