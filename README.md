@@ -6,7 +6,7 @@ The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/doc
 
 This library also supports the LIS2DH12, another widely used three-axis MEMS accelerometer and which can be found on [Electric Imp’s impExplorer&trade; Kit](https://developer.electricimp.com/gettingstarted/devkits).
 
-**To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.1"` **to the top of your device code**
+**To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.2"` **to the top of your device code**
 
 ## Class Usage ##
 
@@ -136,7 +136,7 @@ This method enables or disables all three axes on the accelerometer. Calling the
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| *state* | Boolean | No | Activate (`true`) or disable (`false`) the acceleromater is active (Default: `true`) |
+| *state* | Boolean | No | Activate (`true`) or disable (`false`) the accelerometer (Default: `true`) |
 
 #### Return Value ####
 
@@ -200,7 +200,7 @@ This method sets the measurement range of the sensor in Gs. Supported ranges are
 
 #### Return Value ####
 
-Integer &mdash; the current measurement range. 
+Integer &mdash; the current measurement range.
 
 #### Example ####
 
@@ -216,7 +216,7 @@ This method returns the currently-set measurement range of the sensor in Gs.
 
 #### Return Value ####
 
-Integer &mdash; the current measurement range. 
+Integer &mdash; the current measurement range.
 
 ```
 server.log(format("Current Sensor Range is +/- %dG", accel.getRange()));
@@ -245,7 +245,7 @@ This method configures an interrupt when the FIFO buffer reaches the set waterma
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Example ####
 
@@ -333,7 +333,7 @@ The following is taken from the from [LIS3DH Datasheet](http://www.st.com/st-web
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Example ####
 
@@ -357,7 +357,7 @@ This method configures the intertial interrupt generator to generate interrupts 
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Example ####
 
@@ -384,7 +384,7 @@ This method configures the click interrupt generator.
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Single Click Example ####
 
@@ -412,7 +412,7 @@ This method enables (*state* is `true`) or disables (*state* is `false`) data-re
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Example ####
 
@@ -435,7 +435,7 @@ Interrupt latching is disabled by default.
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Example ####
 
@@ -524,7 +524,7 @@ function takeReading() {
     } else {
       // add timestamp to result table
       result.ts <- time();
-      
+
       // log reading
       foreach(k, v in result) {
         server.log(k + ": " + v);
@@ -635,7 +635,7 @@ This method configures the high-pass filter.
 
 #### Return Value ####
 
-Nothing. 
+Nothing.
 
 #### Example ####
 
