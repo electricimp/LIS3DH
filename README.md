@@ -136,7 +136,7 @@ This method enables or disables all three axes on the accelerometer. Calling the
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| *state* | Boolean | No | Activate (`true`) or disable (`false`) the accelerometer is active (Default: `true`) |
+| *state* | Boolean | No | Activate (`true`) or disable (`false`) the accelerometer (Default: `true`) |
 
 #### Return Value ####
 
