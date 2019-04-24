@@ -1,12 +1,12 @@
 # LIS3DH 3-Axis Accelerometer #
 
-[![Build Status](https://api.travis-ci.org/electricimp/LIS3DH.svg?branch=master)](https://travis-ci.org/electricimp/LIS3DH)
-
 The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a three-axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it. The LIS3DH can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
 
 This library also supports the LIS2DH12, another widely used three-axis MEMS accelerometer and which can be found on [Electric Imp’s impExplorer&trade; Kit](https://developer.electricimp.com/gettingstarted/devkits).
 
 **To add this library to your project, add** `#require "LIS3DH.device.lib.nut:2.0.2"` **to the top of your device code**
+
+![Build Status](https://cse-ci.electricimp.com/app/rest/builds/buildType:(id:Lis3dh_BuildAndTest)/statusIcon)
 
 ## Class Usage ##
 
