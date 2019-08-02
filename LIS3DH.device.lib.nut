@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2015-17 Electric Imp
+// Copyright (c) 2015-19 Electric Imp
 //
 // SPDX-License-Identifier: MIT
 //
@@ -98,7 +98,7 @@ const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
 class LIS3DH {
-    static VERSION = "2.0.2";
+    static VERSION = "2.0.3";
 
     // I2C information
     _i2c = null;
@@ -130,7 +130,6 @@ class LIS3DH {
         _setReg(LIS3DH_INT1_THS, 0x00);
         _setReg(LIS3DH_INT1_DURATION, 0x00);
         _setReg(LIS3DH_CLICK_CFG, 0x00);
-        _setReg(LIS3DH_CLICK_SRC, 0x00);
         _setReg(LIS3DH_CLICK_THS, 0x00);
         _setReg(LIS3DH_TIME_LIMIT, 0x00);
         _setReg(LIS3DH_TIME_LATENCY, 0x00);

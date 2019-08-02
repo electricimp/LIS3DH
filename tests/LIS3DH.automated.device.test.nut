@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2015-17 Electric Imp
+// Copyright (c) 2015-19 Electric Imp
 //
 // SPDX-License-Identifier: MIT
 //
@@ -135,7 +135,7 @@ class MyTestCase extends ImpTestCase {
                     imp.wakeup(DATA_WAIT, function() {
                         res = accel.getAccel();
                         // technically it's possible to have all axes at 0
-                        // acceleration but it's unlikedly
+                        // acceleration but it's unlikely
                         if (!(res.x || res.y || res.z)) {
                             reject("failed to enable axes");
                         } else {
@@ -145,6 +145,30 @@ class MyTestCase extends ImpTestCase {
                 }
             }.bindenv(this));
         }.bindenv(this))
+    }
+
+    function testReset() {
+        local accel = getLIS();
+        accel.reset();
+
+        // Go through and check all the register values
+        // These come from the datasheet
+        this.assertEqual(0x07, _i2c.read(0x32, LIS3DH_CTRL_REG1.tochar(), 1)[0], "Register LIS3DH_CTRL_REG1 didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CTRL_REG2.tochar(), 1)[0], "Register LIS3DH_CTRL_REG2 didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CTRL_REG3.tochar(), 1)[0], "Register LIS3DH_CTRL_REG3 didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CTRL_REG4.tochar(), 1)[0], "Register LIS3DH_CTRL_REG4 didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CTRL_REG5.tochar(), 1)[0], "Register LIS3DH_CTRL_REG5 didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CTRL_REG6.tochar(), 1)[0], "Register LIS3DH_CTRL_REG6 didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_INT1_CFG.tochar(), 1)[0], "Register LIS3DH_INT1_CFG didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_INT1_THS.tochar(), 1)[0], "Register LIS3DH_INT1_THS didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_INT1_DURATION.tochar(), 1)[0], "Register LIS3DH_INT1_DURATION didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CLICK_CFG.tochar(), 1)[0], "Register LIS3DH_CLICK_CFG didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_CLICK_THS.tochar(), 1)[0], "Register LIS3DH_CLICK_THS didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_TIME_LIMIT.tochar(), 1)[0], "Register LIS3DH_TIME_LIMIT didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_TIME_LATENCY.tochar(), 1)[0], "Register LIS3DH_TIME_LATENCY didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_TIME_WINDOW.tochar(), 1)[0], "Register LIS3DH_TIME_WINDOW didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_FIFO_CTRL_REG.tochar(), 1)[0], "Register LIS3DH_FIFO_CTRL_REG didn't get reset correctly! Got %s");
+        this.assertEqual(0x00, _i2c.read(0x32, LIS3DH_TEMP_CFG_REG.tochar(), 1)[0], "Register LIS3DH_TEMP_CFG_REG didn't get reset correctly! Got %s");
     }
 
     function tearDown() {
