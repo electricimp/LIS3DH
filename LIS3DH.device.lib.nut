@@ -130,7 +130,6 @@ class LIS3DH {
         _setReg(LIS3DH_INT1_THS, 0x00);
         _setReg(LIS3DH_INT1_DURATION, 0x00);
         _setReg(LIS3DH_CLICK_CFG, 0x00);
-        _setReg(LIS3DH_CLICK_SRC, 0x00);
         _setReg(LIS3DH_CLICK_THS, 0x00);
         _setReg(LIS3DH_TIME_LIMIT, 0x00);
         _setReg(LIS3DH_TIME_LATENCY, 0x00);
