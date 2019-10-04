@@ -25,6 +25,8 @@
 // ----------------------------------------------------------------------------
 // In the following example we setup an interrupt for free-fall detection:
 
+#require "LIS3DH.device.lib.nut:3.0.0"
+
 function sensorSetup() {
     // Configure accelerometer
     accel.setDataRate(100);

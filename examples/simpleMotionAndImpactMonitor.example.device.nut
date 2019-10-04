@@ -25,6 +25,7 @@
 // ----------------------------------------------------------------------------
 // Simple motion and impact detection example: 
 
+#require "LIS3DH.device.lib.nut:3.0.0"
 
 // Configure i2c and accelerometer
 // ----------------------------------------------------------------------------

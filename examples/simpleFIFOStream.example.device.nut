@@ -26,9 +26,10 @@
 // This example sets the FIFO buffer to Stream Mode and reads the data from the 
 // buffer whenever the watermark is reached:
 
-// Interrupt handler that reads & logs data from FIFO buffer and resets buffer if needed
+#require "LIS3DH.device.lib.nut:3.0.0"
+
 function readBuffer() {
-    if (wakePin.read() == 0) return;
+    if (intPin.read() == 0) return;
 
     // Read buffer
     local stats = accel.getFifoStats();
@@ -50,12 +51,14 @@ function readBuffer() {
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
-accel <- LIS3DH(i2c);
+accel <- LIS3DH(i2c, 0x32);
 
 // Configure interrupt pin
 intPin <- hardware.pin1;
 intPin.configure(DIGITAL_IN_PULLDOWN, readBuffer);
 
+// Reset accel to defalult settings
+accel.reset();
 // Configure accelerometer
 accel.setDataRate(100);
 
@@ -63,3 +66,9 @@ accel.setDataRate(100);
 accel.configureFifo(true, LIS3DH_FIFO_STREAM_MODE);
 // Configure interrupt to trigger when there are 30 entries in the buffer
 accel.configureFifoInterrupts(true, false, 30);
+
+// This example will log a ton, so stop after a few seconds
+imp.wakeup(5, function() {
+    accel.configureFifo(false);
+    accel.configureFifoInterrupts(false);
+})

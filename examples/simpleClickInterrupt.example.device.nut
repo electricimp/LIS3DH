@@ -25,6 +25,8 @@
 // ----------------------------------------------------------------------------
 // In the following example we set up an interrupt for double-click detection:
 
+#require "LIS3DH.device.lib.nut:3.0.0"
+
 function interruptHandler() {
     if (int.read() == 0) return;
 
@@ -39,7 +41,7 @@ i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
 accel <- LIS3DH(i2c, 0x32);
 
-int <- hardware.pinB;
+int <- hardware.pin1;
 int.configure(DIGITAL_IN, interruptHandler);
 
 // Configure accelerometer
