@@ -307,8 +307,8 @@ class LIS3DH {
         _setReg(LIS3DH_CTRL_REG2, filters | cutoff | mode);
     }
 
-    // Enable/disable and configure FIFO buffer watermark interrupts
-    function configureFifo(enBuffer, fifomode = LIS3DH_FIFO_STREAM_MODE, watermark = 28) {
+    // Enable/disable and configure FIFO buffer
+    function configureFifo(enBuffer, fifomode = LIS3DH_FIFO_STREAM_MODE) {
 
         // Enable/disable the FIFO buffer
         _setRegBit(LIS3DH_CTRL_REG5, 6, enBuffer ? 1 : 0);
@@ -317,22 +317,37 @@ class LIS3DH {
         // this library currently doesn't change this bit, so trigger selection is  
         // alwasys set to trigger on int1 
 
+        local val = _getReg(LIS3DH_FIFO_CTRL_REG) & 0x3F;
+
         if (enBuffer) {
-            _setReg(LIS3DH_FIFO_CTRL_REG, (fifomode & 0xC0) | (watermark & 0x1F));
+            _setReg(LIS3DH_FIFO_CTRL_REG, (val | fifomode));
         } else {
-            // Clear watermark & set mode to bypass
-            _setReg(LIS3DH_FIFO_CTRL_REG, 0x00);
+            // Set mode to bypass
+            _setReg(LIS3DH_FIFO_CTRL_REG, val);
         }
     }
 
     //-------------------- INTERRUPTS --------------------//
 
     // Enable/Disable FIFO watermark and/or FIFO overrun interrupts on Int1 pin
-    function enableFifoInterrupts(enWatermark, enOverrun) {
-        local val = _getReg(LIS3DH_CTRL_REG3) & 0xF9;
-        if (enWatermark) val = val | 0x04;
-        if (enOverrun)   val = val | 0x02;
-        _setReg(LIS3DH_CTRL_REG3, val);
+    function configureFifoInterrupts(enWatermark, enOverrun = false, watermark = 29) {
+        // Adjust if optional parameters are not expected types
+        if (typeof enOverrun == "integer") {
+            watermark = enOverrun;
+            enOverrun = false;
+        }
+
+        local fcVal = _getReg(LIS3DH_FIFO_CTRL_REG) & 0xE0;
+        // NOTE: Watermark range in register is 0-31, so adjust given watermark value 
+        // down by one
+        fcVal = fcVal | (--watermark & 0x1F);
+        // Set watermark
+        _setReg(LIS3DH_FIFO_CTRL_REG, fcVal);
+
+        local r3val = _getReg(LIS3DH_CTRL_REG3) & 0xF9;
+        if (enWatermark) r3val = r3val | 0x04;
+        if (enOverrun)   r3val = r3val | 0x02;
+        _setReg(LIS3DH_CTRL_REG3, r3val);
     }
 
     // Enable/disable and configure inertial interrupts
