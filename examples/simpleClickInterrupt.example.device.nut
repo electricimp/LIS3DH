@@ -49,3 +49,6 @@ accel.setDataRate(100);
 
 // Set up a double-click interrupt
 accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
+
+server.log("Tap device 2x to trigger interrupt...");
+server.log("-------------------------------------");
