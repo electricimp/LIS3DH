@@ -1,6 +1,8 @@
-# LIS3DH 2.0.3 #
+# LIS3DH 3.0.0 #
 
-The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a three-axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it. The LIS3DH can interface over I&sup2;C or SPI. This library addresses only I&sup2;C. All interrupt functions in the current library are configured for int1 only. There is no support for settings or control on int2.
+The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a three-axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it. The LIS3DH can interface over I&sup2;C or SPI; this library addresses only I&sup2;C.
+
+All interrupt functions in the current library are configured for interrupt 1 only. There is no support for settings or control on interrupt 2.
 
 This library also supports the LIS2DH12, another widely used three-axis MEMS accelerometer and which can be found on [Electric Imp’s impExplorer&trade; Kit](https://developer.electricimp.com/gettingstarted/devkits).
 
@@ -128,21 +130,21 @@ This method reads the latest measurement from the accelerometer. It takes an opt
 
 | Parameter | Type | Required? | Description |
 | --- | --- | --- | --- |
-| *callback* | Function | No | Function called with the accelerometer reading as its only argument (see below) |
+| *callback* | Function | No | Function called with the accelerometer reading as its only argument. The reading is a table as described in **Return Value**, below |
 
 #### Return Value ####
 
-Table &mdash; containing the latest reading from the accelerometer with slots *x*, *y* and *z* or an *error* slot if an i2c error was encountered. **Note** if *getAccel()* is called with an argument, it will return nothing.
+Table &mdash; The latest reading from the accelerometer as a table with slots *x*, *y* and *z*, or just *error* if an I&sup2;C error was encountered. **Note** if *getAccel()* is called with an argument, it will return nothing.
 
 #### Synchronous Example ####
 
 ```squirrel
 accel.setDataRate(100);
-local val = accel.getAccel();
-if ("error" in val) {
-    server.error(val.error);
+local reading = accel.getAccel();
+if ("error" in reading) {
+    server.error(reading.error);
 } else {
-    server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", val.x, val.y, val.z));
+    server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", reading.x, reading.y, reading.z));
 }
 ```
 
@@ -150,11 +152,11 @@ if ("error" in val) {
 
 ```squirrel
 accel.setDataRate(100);
-accel.getAccel(function(val) {
-    if ("error" in val) {
-        server.error(val.error);
+accel.getAccel(function(reading) {
+    if ("error" in reading) {
+        server.error(reading.error);
     } else {
-        server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", val.x, val.y, val.z));
+        server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", reading.x, reading.y, reading.z));
     }
 });
 ```
@@ -215,7 +217,7 @@ accel.enableADC(true);
 
 ### readADC(*line*) ###
 
-The *readADC()* method returns a reading from approximately 0.8-1.6V from the specified ADC line. The required line, one of three, is set by providing one the following constants: *LIS3DH_ADC1*, *LIS3DH_ADC2* or *LIS3DH_ADC3*. The ADC must first be enabled by calling `enableADC(true)`.
+This method returns a reading from approximately 0.8-1.6V from the specified ADC line. The required line, one of three, is set by providing one the following constants: *LIS3DH_ADC1*, *LIS3DH_ADC2* or *LIS3DH_ADC3*. The ADC must first be enabled by calling `enableADC(true)`.
 
 #### Parameters ####
 
@@ -256,9 +258,9 @@ This method configures the high-pass filter.
 
 | Parameter | Type | Required? | Description |
 | --- | --- | --- | --- |
-| *filters* | Integer | Yes | Select the filter(s) to enable/disable by OR-ing together any of the constants found in the [filters table](#filters) below |
-| *cutoff* | Integer | No | See the high-pass filter [cut-off frequency table](#high-pass-filter-cut-off-frequencies) below. Default: *LIS3DH_HPF_CUTOFF1* |
-| *mode* | Integer | No | See [modes table](#modes) below. Default: *LIS3DH_HPF_DEFAULT_MODE* |
+| *filters* | Integer | Yes | Select the filter(s) to enable/disable by OR-ing together any of the constants found under [**Filters**](#filters), below |
+| *cutoff* | Integer | No | See [**High-pass Filter Cut-off Frequencies**](#high-pass-filter-cut-off-frequencies), below. Default: *LIS3DH_HPF_CUTOFF1* |
+| *mode* | Integer | No | See [**Modes**](#modes), below. Default: *LIS3DH_HPF_DEFAULT_MODE* |
 
 #### Filters ####
 
@@ -312,8 +314,8 @@ This method enables/disables the FIFO buffer and configures its mode.
 
 | Parameter | Type | Required? | Description |
 | --- | --- | --- | --- |
-| *enableBuffer* | Boolean | Yes | Whether to enable (`true`) or disable (`false`) the Fifo Buffer |
-| *mode* | Bitfield | No | See [fifo modes table](#fifo-modes), below. Default: *LIS3DH_FIFO_STREAM_MODE* |
+| *enableBuffer* | Boolean | Yes | Whether to enable (`true`) or disable (`false`) the Fifo buffer |
+| *mode* | Bitfield | No | See [**FIFO Modes**](#fifo-modes), below. Default: *LIS3DH_FIFO_STREAM_MODE* |
 
 #### FIFO Modes ####
 
@@ -331,13 +333,13 @@ Nothing.
 #### Example ####
 
 ```
-// Enable the FIFO buffer in LIS3DH_FIFO_STREAM_TO_FIFO_MODE 
+// Enable the FIFO buffer in LIS3DH_FIFO_STREAM_TO_FIFO_MODE
 accel.configureFifo(true, LIS3DH_FIFO_STREAM_TO_FIFO_MODE);
 ```
 
 ### configureFifoInterrupts(*enableWatermark[, enableOverrun][, watermark]*) ###
 
-This method enables/disables FIFO watermark and overrun interrupts. Please note the FIFO buffer must be enabled for the interrupt to work properly. 
+This method enables/disables FIFO watermark and overrun interrupts. Please note the FIFO buffer must be enabled for the interrupt to work properly.
 
 #### Parameters ####
 
@@ -416,7 +418,7 @@ This method configures the inertial interrupt generator.
 | *state* | Boolean | Yes | The interrupt state: `true` to enable, `false` to disable |
 | *threshold* | Float | No | Inertial interrupts threshold in Gs. Default: 2.0 |
 | *duration* | Integer | No | Number of samples exceeding threshold required to generate interrupt. Default: 5 |
-| *options* | Bitfield | No | See the [flags table](#option-flags) below. Default: *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH*) |
+| *options* | Bitfield | No | See [**Option Flags**](#option-flags), below. Default: *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH*) |
 
 The default configuration for the Inertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 2G. This behavior can be changed by OR-ing together any of the following flags:
 
@@ -430,8 +432,8 @@ The default configuration for the Inertial Interrupt generator is to generate an
 | *LIS3DH_Y_HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
 | *LIS3DH_Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
 | *LIS3DH_Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
-| *LIS3DH_AOI*    | Sets the AOI flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes) below) |
-| *LIS3DH_SIX_D*  | Sets the 6D flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes) below)*|
+| *LIS3DH_AOI*    | Sets the AOI flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes), below) |
+| *LIS3DH_SIX_D*  | Sets the 6D flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes), below) |
 
 #### Inertial Interrupt Modes ####
 
@@ -456,7 +458,7 @@ Nothing.
 
 ```squirrel
 // Configure the Inertial interrupt generator to generate an interrupt
-// when acceleration on all three exceeds 1G.
+// when acceleration on all three exceeds 1G.s
 accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW | LIS3DH_AOI)
 ```
 
@@ -464,7 +466,7 @@ accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH_X_LOW | LIS3DH_Y_LOW | LI
 
 This method configures the inertial interrupt generator to generate interrupts when the device is in free fall, ie. acceleration on all axis approaches 0.
 
-**Note** This method will overwrite any settings configured with *configureInertialInterrupt()*.
+**Note** This method will overwrite any settings configured with [*configureInertialInterrupt()*](#configureinertialinterruptstate-threshold-duration-soptions).
 
 #### Parameters ####
 
