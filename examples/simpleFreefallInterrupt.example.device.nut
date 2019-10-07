@@ -67,7 +67,7 @@ function takeReading() {
 }
 
 function interruptHandler() {
-    if (int.read() == 0) return;
+    if (wake.read() == 0) return;
 
     // Get + clear the interrupt + clear
     local data = accel.getInterruptTable();
