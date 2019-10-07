@@ -35,7 +35,7 @@ function readBuffer() {
     local stats = accel.getFifoStats();
     for (local i = 0 ; i < stats.unread ; i++) {
         local data = accel.getAccel();
-        server.log(format("Accel (x,y,z): [%d, %d, %d]", data.x, data.y, data.z));
+        server.log(format("Accel (x,y,z): [%f, %f, %f]", data.x, data.y, data.z));
     }
 
     // Check if we are now over-run
@@ -62,6 +62,9 @@ accel.reset();
 // Configure accelerometer
 accel.setDataRate(100);
 
+server.log("Log accel streaming data using FIFO interrupt...");
+server.log("------------------------------------------------");
+
 // Configure the FIFO buffer in Stream Mode 
 accel.configureFifo(true, LIS3DH_FIFO_STREAM_MODE);
 // Configure interrupt to trigger when there are 30 entries in the buffer
@@ -71,4 +74,7 @@ accel.configureFifoInterrupts(true, false, 30);
 imp.wakeup(5, function() {
     accel.configureFifo(false);
     accel.configureFifoInterrupts(false);
-})
+    
+    server.log("Stop logging accel streaming data.");
+    server.log("------------------------------------------------");
+}) 
