@@ -458,7 +458,7 @@ Nothing.
 
 ```squirrel
 // Configure the Inertial interrupt generator to generate an interrupt
-// when acceleration on all three exceeds 1G.s
+// when acceleration on all three exceeds 1G.
 accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH_X_LOW | LIS3DH_Y_LOW | LIS3DH_Z_LOW | LIS3DH_AOI)
 ```
 
