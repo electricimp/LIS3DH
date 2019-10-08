@@ -1,10 +1,12 @@
-# LIS3DH 2.0.3 #
+# LIS3DH 3.0.0 #
 
-The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a three-axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it. The LIS3DH can interface over I&sup2;C or SPI. This class addresses only I&sup2;C for the time being.
+The [LIS3DH](http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00274221.pdf) is a three-axis MEMS accelerometer. The LIS3DH application note can be found [here](http://www.st.com/web/en/resource/technical/document/application_note/CD00290365.pdf). This sensor has extensive functionality and this class has not yet implemented all of it. The LIS3DH can interface over I&sup2;C or SPI; this library addresses only I&sup2;C.
+
+All interrupt functions in the current library are configured for interrupt 1 only. There is no support for settings or control on interrupt 2.
 
 This library also supports the LIS2DH12, another widely used three-axis MEMS accelerometer and which can be found on [Electric Imp’s impExplorer&trade; Kit](https://developer.electricimp.com/gettingstarted/devkits).
 
-**To include this library in your project, add** `#require "LIS3DH.device.lib.nut:2.0.3"` **at the top of your device code**
+**To include this library in your project, add** `#require "LIS3DH.device.lib.nut:3.0.0"` **at the top of your device code**
 
 ![Build Status](https://cse-ci.electricimp.com/app/rest/builds/buildType:(id:Lis3dh_BuildAndTest)/statusIcon)
 
@@ -22,7 +24,7 @@ The class’ constructor takes one required parameter (a configured imp I&sup2;C
 | *i2cAddress* | byte | No | The I&sup2;C address of the accelerometer. Default: `0x30` |
 
 ```squirrel
-#require "LIS3DH.device.lib.nut:2.0.3"
+#require "LIS3DH.device.lib.nut:3.0.0"
 
 i2c <- hardware.i2c89;
 i2c.configure(CLOCK_SPEED_400_KHZ);
@@ -91,47 +93,6 @@ Nothing.
 accel.setMode(LIS3DH_MODE_HIGH_RESOLUTION);
 ```
 
-### enableADC(*state*) ###
-
-This method enables the three ADC lines available to the LIS3DH (the LIS2DH does not have these auxiliary lines available). Its input ranges from approximately 0.8-1.6V. By default, the ADC is disabled.
-
-#### Parameters ####
-
-| Parameter | Type | Required? | Description |
-| --- | --- | --- | --- |
-| *state* | Boolean | Yes | Sets the ADC on (`true`) or off (`false`) |
-
-#### Return Value ####
-
-Nothing.
-
-#### Example ####
-
-```squirrel
-accel.enableADC(true);
-```
-
-### readADC(*line*) ###
-
-The *readADC()* method returns a reading from approximately 0.8-1.6V from the specified ADC line. The required line, one of three, is set by providing one the following constants: *LIS3DH_ADC1*, *LIS3DH_ADC2* or *LIS3DH_ADC3*. The ADC must first be enabled by calling `enableADC(true)`.
-
-#### Parameters ####
-
-| Parameter | Type | Required? | Description |
-| --- | --- | --- | --- |
-| *line* | Integer | Yes | The ADC line |
-
-#### Return Value ####
-
-Float &mdash; the reading from the selected ADC line.
-
-#### Example ####
-
-```squirrel
-accel.enableADC(true);
-local reading = accel.readADC(LIS3DH_ADC1);
-```
-
 ### enable(*[state]*) ###
 
 This method enables or disables all three axes on the accelerometer. Calling the method without an argument enables the accelerometer. When *state* is `false`, the accelerometer will be disabled.
@@ -169,26 +130,34 @@ This method reads the latest measurement from the accelerometer. It takes an opt
 
 | Parameter | Type | Required? | Description |
 | --- | --- | --- | --- |
-| *callback* | Function | No | Function called with the accelerometer reading as its only argument (see below) |
+| *callback* | Function | No | Function called with the accelerometer reading as its only argument. The reading is a table as described in **Return Value**, below |
 
 #### Return Value ####
 
-Table &mdash; the latest reading from the accelerometer as values to the keys *x*, *y* and *z*. **Note** if *getAccel()* is called with an argument, it will return nothing.
+Table &mdash; The latest reading from the accelerometer as a table with slots *x*, *y* and *z*, or just *error* if an I&sup2;C error was encountered. **Note** if *getAccel()* is called with an argument, it will return nothing.
 
 #### Synchronous Example ####
 
 ```squirrel
 accel.setDataRate(100);
-local val = accel.getAccel();
-server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", val.x, val.y, val.z));
+local reading = accel.getAccel();
+if ("error" in reading) {
+    server.error(reading.error);
+} else {
+    server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", reading.x, reading.y, reading.z));
+}
 ```
 
 #### Asynchronous Example ####
 
 ```squirrel
 accel.setDataRate(100);
-accel.getAccel(function(val) {
-    server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", val.x, val.y, val.z));
+accel.getAccel(function(reading) {
+    if ("error" in reading) {
+        server.error(reading.error);
+    } else {
+        server.log(format("Acceleration (G): (%0.2f, %0.2f, %0.2f)", reading.x, reading.y, reading.z));
+    }
 });
 ```
 
@@ -226,17 +195,127 @@ Integer &mdash; the current measurement range.
 server.log(format("Current Sensor Range is +/- %dG", accel.getRange()));
 ```
 
-### configureFifoInterrupt(*state[, fifomode][, watermark]*) ###
+### enableADC(*state*) ###
 
-This method configures an interrupt when the FIFO buffer reaches the set watermark.
+This method enables the three ADC lines available to the LIS3DH (the LIS2DH does not have these auxiliary lines available). Its input ranges from approximately 0.8-1.6V. By default, the ADC is disabled.
 
 #### Parameters ####
 
 | Parameter | Type | Required? | Description |
 | --- | --- | --- | --- |
-| *state* | Boolean | Yes | FIFO state: `true` to enable, `false` to disable |
-| *fifomode* | Bitfield | No | See [fifo modes table](#fifo-modes), below. Default: *LIS3DH_FIFO_STREAM_MODE* |
-| *watermark* | Integer | No | Number of buffer slots filled to generate interrupt. Buffer has 32 slots. Default: 28 |
+| *state* | Boolean | Yes | Sets the ADC on (`true`) or off (`false`) |
+
+#### Return Value ####
+
+Nothing.
+
+#### Example ####
+
+```squirrel
+accel.enableADC(true);
+```
+
+### readADC(*line*) ###
+
+This method returns a reading from approximately 0.8-1.6V from the specified ADC line. The required line, one of three, is set by providing one the following constants: *LIS3DH_ADC1*, *LIS3DH_ADC2* or *LIS3DH_ADC3*. The ADC must first be enabled by calling `enableADC(true)`.
+
+#### Parameters ####
+
+| Parameter | Type | Required? | Description |
+| --- | --- | --- | --- |
+| *line* | Integer | Yes | The ADC line |
+
+#### Return Value ####
+
+Float &mdash; the reading from the selected ADC line.
+
+#### Example ####
+
+```squirrel
+accel.enableADC(true);
+local reading = accel.readADC(LIS3DH_ADC1);
+```
+
+### getDeviceId() ###
+
+This method returns the one-byte device ID of the sensor (from the *WHO_AM_I* register). The *getDeviceId()* method is a simple way to test if your LIS3DH sensor is correctly connected.
+
+#### Return Value ####
+
+Integer &mdash; single-byte device ID.
+
+#### Example ####
+
+```squirrel
+server.log(format("Device ID: 0x%02X", accel.getDeviceId()));
+```
+
+### configureHighPassFilter(*filters[, cutoff][, mode]*) ###
+
+This method configures the high-pass filter.
+
+#### Parameters ####
+
+| Parameter | Type | Required? | Description |
+| --- | --- | --- | --- |
+| *filters* | Integer | Yes | Select the filter(s) to enable/disable by OR-ing together any of the constants found under [**Filters**](#filters), below |
+| *cutoff* | Integer | No | See [**High-pass Filter Cut-off Frequencies**](#high-pass-filter-cut-off-frequencies), below. Default: *LIS3DH_HPF_CUTOFF1* |
+| *mode* | Integer | No | See [**Modes**](#modes), below. Default: *LIS3DH_HPF_DEFAULT_MODE* |
+
+#### Filters ####
+
+| Filter Constant | Description |
+| --- | --- |
+| *LIS3DH_HPF_AOI_INT1* | High-pass filter enabled for AOI function on interrupt 1 |
+| *LIS3DH_HPF_AOI_INT2* | High-pass filter enabled for AOI function on interrupt 2 |
+| *LIS3DH_HPF_CLICK* | High-pass filter enabled for CLICK function |
+| *LIS3DH_HPF_FDS* | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
+| *LIS3DH_HPF_DISABLED* | Disables all filters |
+
+#### High-pass Filter Cut-off Frequencies ####
+
+| Cut-off Constant | f@1Hz | f@10Hz | f@25Hz | f@50Hz | f@100Hz | f@200Hz | f@400Hz | f@1600Hz | f@5000Hz |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| *LIS3DH_HPF_CUTOFF1* | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
+| *LIS3DH_HPF_CUTOFF2* | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
+| *LIS3DH_HPF_CUTOFF3* | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
+| *LIS3DH_HPF_CUTOFF4* | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
+
+#### Modes ####
+
+| Mode Constant | Description |
+| --- | --- |
+| *LIS3DH_HPF_DEFAULT_MODE* | Normal mode (reset reading *HP_RESET_FILTER*) |
+| *LIS3DH_HPF_REFERENCE_SIGNAL* | Reference signal for filtering |
+| *LIS3DH_HPF_NORMAL_MODE* | Normal mode |
+| *LIS3DH_HPF_AUTORESET_ON_INTERRUPT* | Autoreset on interrupt event |
+
+#### Return Value ####
+
+Nothing.
+
+#### Example ####
+
+```squirrel
+// Enable high-pass filter on click and inertial interrupt 1 with auto reset on interrupt event
+accel.configureHighPassFilter(LIS3DH_HPF_AOI_INT1 | LIS3DH_HPF_CLICK,
+                              null,
+                              LIS3DH_HPF_AUTORESET_ON_INTERRUPT);
+
+// Disable high pass filter
+accel.configureHighPassFilter(LIS3DH_HPF_DISABLED);
+```
+
+### configureFifo(*enableBuffer[, mode]*) ###
+
+This method enables/disables the FIFO buffer and configures its mode.
+
+#### Parameters ####
+
+| Parameter | Type | Required? | Description |
+| --- | --- | --- | --- |
+| *enableBuffer* | Boolean | Yes | Whether to enable (`true`) or disable (`false`) the Fifo buffer |
+| *mode* | Bitfield | No | See [**FIFO Modes**](#fifo-modes), below. Default: *LIS3DH_FIFO_STREAM_MODE* |
 
 #### FIFO Modes ####
 
@@ -253,45 +332,79 @@ Nothing.
 
 #### Example ####
 
-This example sets the FIFO buffer to Stream Mode and reads the data from the buffer whenever the watermark is reached:
+```
+// Enable the FIFO buffer in LIS3DH_FIFO_STREAM_TO_FIFO_MODE
+accel.configureFifo(true, LIS3DH_FIFO_STREAM_TO_FIFO_MODE);
+```
+
+### configureFifoInterrupts(*enableWatermark[, enableOverrun][, watermark]*) ###
+
+This method enables/disables FIFO watermark and overrun interrupts. Please note the FIFO buffer must be enabled for the interrupt to work properly.
+
+#### Parameters ####
+
+| Parameter | Type | Required? | Description |
+| --- | --- | --- | --- |
+| *enableWatermark* | Boolean | Yes | Whether to enable (`true`) or disable (`false`) the FIFO watermark interrupt |
+| *enableOverrun* | Boolean | No | Whether to enable (`true`) or disable (`false`) the FIFO overrun interrupt Default: `false` |
+| *watermark* | Integer | No | Number of buffer slots filled to generate interrupt. Buffer has 32 slots. Default: 29 |
+
+#### Example ####
 
 ```squirrel
-// Function to read from FIFO buffer
-function readBuffer() {
-    if (wakePin.read() == 0) return;
-
-    // Read buffer
-    local stats = accel.getFifoStats();
-    for (local i = 0 ; i < stats.unread ; i++) {
-        local data = accel.getAccel();
-        server.log(format("Accel (x,y,z): [%d, %d, %d]", data.x, data.y, data.z));
-    }
-
-    // Check if we are now over-run
-    local stats = accel.getFifoStats();
-    if (stats.overrun) {
-        server.error("Accelerometer buffer over-run");
-
-        // Set FIFO mode to bypass to clear the buffer and then return to stream mode
-        accel.configureFifoInterrupt(true, LIS3DH_FIFO_BYPASS_MODE);
-        accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
-    }
-}
-
-i2c <- hardware.i2cAB;
-i2c.configure(CLOCK_SPEED_400_KHZ);
-accel <- LIS3DH(i2c);
-
-// Configure interrupt pin
-wakePin <- hardware.pinW;
-wakePin.configure(DIGITAL_IN_PULLDOWN, readBuffer);
-
-// Configure accelerometer
-accel.setDataRate(100);
-
 // Configure the FIFO buffer in Stream Mode and set interrupt generator
 // to generate an interrupt when there are 30 entries in the buffer
-accel.configureFifoInterrupt(true, LIS3DH_FIFO_STREAM_MODE, 30);
+accel.configureFifo(true);
+accel.configureFifoInterrupts(true, false, 30);
+```
+
+### getFifoStats() ###
+
+This method returns information about the state of the FIFO buffer.
+
+#### Return Value ####
+
+Table &mdash; the FIFO buffer state:
+
+| Key | Type | Description |
+| --- | --- | --- |
+| *watermark* | Boolean | `true` if watermark has been set |
+| *overrun* | Boolean | `true` if data has been overwritten without being read |
+| *empty* | Boolean | `true` if buffer is empty |
+| *unread* | Integer | Number of unread slots in buffer |
+
+#### Example ####
+
+```squirrel
+local fifoStatus = accel.getFifoStats();
+local numUnreadReadings = fifoStatus.unread;
+for (local i = 0; i < numUnreadReadings; i++) {
+    local reading = accel.getAccel();
+    server.log(format("Accel (x,y,z): [%d, %d, %d]", data.x, data.y, data.z));
+}
+```
+
+### configureInterruptLatching(*state*) ###
+
+Enables (*state* is `true`) or disables (*state* is `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
+
+Interrupt latching is disabled by default.
+
+#### Parameters ####
+
+| Parameter | Type | Required? | Description |
+| --- | --- | --- | --- |
+| *state* | Boolean | Yes | The latching state: `true` to enable, `false` to disable |
+
+#### Return Value ####
+
+Nothing.
+
+#### Example ####
+
+```
+// Configure interrupt pin to latch
+accel.configureInterruptLatching(true);
 ```
 
 ### configureInertialInterrupt(*state[, threshold][, duration][, options]*) ####
@@ -305,7 +418,7 @@ This method configures the inertial interrupt generator.
 | *state* | Boolean | Yes | The interrupt state: `true` to enable, `false` to disable |
 | *threshold* | Float | No | Inertial interrupts threshold in Gs. Default: 2.0 |
 | *duration* | Integer | No | Number of samples exceeding threshold required to generate interrupt. Default: 5 |
-| *options* | Bitfield | No | See the [flags table](#option-flags) below. Default: *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH*) |
+| *options* | Bitfield | No | See [**Option Flags**](#option-flags), below. Default: *LIS3DH_X_HIGH* \| *LIS3DH_Y_HIGH* \| *LIS3DH_Z_HIGH*) |
 
 The default configuration for the Inertial Interrupt generator is to generate an interrupt when the acceleration on *any* axis exceeds 2G. This behavior can be changed by OR-ing together any of the following flags:
 
@@ -319,8 +432,8 @@ The default configuration for the Inertial Interrupt generator is to generate an
 | *LIS3DH_Y_HIGH* | Generates an interrupt when the y-axis acceleration goes above the threshold |
 | *LIS3DH_Z_LOW*  | Generates an interrupt when the z-axis acceleration goes below the threshold |
 | *LIS3DH_Z_HIGH* | Generates an interrupt when the z-axis acceleration goes above the threshold |
-| *LIS3DH_AOI*    | Sets the AOI flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes) below) |
-| *LIS3DH_SIX_D*  | Sets the 6D flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes) below)*|
+| *LIS3DH_AOI*    | Sets the AOI flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes), below) |
+| *LIS3DH_SIX_D*  | Sets the 6D flag (see [**Inertial Interrupt Modes**](#inertial-interrupt-modes), below) |
 
 #### Inertial Interrupt Modes ####
 
@@ -353,6 +466,8 @@ accel.configureInertialInterrupt(true, 1.0, 10, LIS3DH_X_LOW | LIS3DH_Y_LOW | LI
 
 This method configures the inertial interrupt generator to generate interrupts when the device is in free fall, ie. acceleration on all axis approaches 0.
 
+**Note** This method will overwrite any settings configured with [*configureInertialInterrupt()*](#configureinertialinterruptstate-threshold-duration-soptions).
+
 #### Parameters ####
 
 | Parameter | Type | Required? | Description |
@@ -370,8 +485,6 @@ Nothing.
 ```squirrel
 accel.configureFreeFallInterrupt(true);
 ```
-
-**Note** This method will overwrite any settings configured with *configureInertialInterrupt()*.
 
 ### configureClickInterrupt(*state[, clickType][, threshold][, timeLimit][, latency][, window]*) ###
 
@@ -427,26 +540,6 @@ accel.setDataRate(1); // 1Hz
 accel.configureDataReadyInterrupt(true);
 ```
 
-### configureInterruptLatching(*state*) ###
-
-Enables (*state* is `true`) or disables (*state* is `false`) interrupt latching. If interrupt latching is enabled, the interrupt signal will remain asserted until the interrupt source register is read by calling *getInterruptTable()*. If latching is disabled, the interrupt signal will remain asserted as long as the interrupt-generating condition persists.
-
-Interrupt latching is disabled by default.
-
-#### Parameters ####
-
-| Parameter | Type | Required? | Description |
-| --- | --- | --- | --- |
-| *state* | Boolean | Yes | The latching state: `true` to enable, `false` to disable |
-
-#### Return Value ####
-
-Nothing.
-
-#### Example ####
-
-For an example, see the sample code under *getInterruptTable()*, below.
-
 ### getInterruptTable() ###
 
 This method reads the LIS3DH’s *INT1_SRC* and *CLICK_SRC* registers.
@@ -470,203 +563,9 @@ Table &mdash; the interrupt settings:
 
 #### Example ####
 
-In the following example we set up an interrupt for double-click detection:
-
 ```squirrel
-function interruptHandler() {
-    if (int.read() == 0) return;
-
-    // Get + clear the interrupt + clear
-    local data = accel.getInterruptTable();
-
-    // Check what kind of interrupt it was
-    if (data.doubleClick) server.log("Double Click");
-}
-
-i2c <- hardware.i2c89;
-i2c.configure(CLOCK_SPEED_400_KHZ);
-accel <- LIS3DH(i2c, 0x32);
-
-int <- hardware.pinB;
-int.configure(DIGITAL_IN, interruptHandler);
-
-// Configure accelerometer
-accel.setDataRate(100);
-
-// Set up a double-click interrupt
-accel.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
-```
-
-In the following example we setup an interrupt for free-fall detection:
-
-```squirrel
-function sensorSetup() {
-    // Configure accelerometer
-    accel.setDataRate(100);
-    accel.configureInterruptLatching(true);
-
-    // Set up a free fall interrupt
-    accel.configureFreeFallInterrupt(true);
-}
-
-// Put imp to Sleep
-function sleep(timer) {
-    server.log("Going to sleep for " + timer + " sec");
-    if (server.isconnected()) {
-        imp.onidle(function() {
-            server.sleepfor(timer);
-        });
-    } else {
-        imp.deepsleepfor(timer);
-    }
-}
-
-// Take reading
-function takeReading() {
-    accel.getAccel(function(result) {
-        if ("err" in result) {
-            // Check for error
-            server.error(result.err);
-        } else {
-            // Add timestamp to result table
-            result.ts <- time();
-
-            // log reading
-            foreach(k, v in result) {
-                server.log(k + ": " + v);
-            }
-        }
-    });
-}
-
-function interruptHandler() {
-    if (int.read() == 0) return;
-
-    // Get + clear the interrupt + clear
-    local data = accel.getInterruptTable();
-
-    // Check what kind of interrupt it was
-    if (data.int1) server.log("Free Fall");
-
-    sleep(30);
-}
-
-i2c <- hardware.i2c89;
-i2c.configure(CLOCK_SPEED_400_KHZ);
-accel <- LIS3DH(i2c, 0x32);
-
-int <- hardware.pinB;
-wake <- hardware.pin1;
-
-int.configure(DIGITAL_IN);
-wake.configure(DIGITAL_IN_WAKEUP);
-
-// Handle WakeUp
-switch(hardware.wakereason()) {
-    case WAKEREASON_TIMER:
-        server.log("WOKE UP B/C TIMER EXPIRED");
-        takeReading();
-        imp.wakeup(2, function() {
-            sleep(30);
-        });
-        break;
-    case WAKEREASON_PIN:
-        server.log("WOKE UP B/C PIN HIGH");
-        interruptHandler();
-        break;
-    default:
-        server.log("WOKE UP B/C RESTARTED DEVICE, LOADED NEW CODE, ETC");
-        sensorSetup();
-        takeReading();
-        imp.wakeup(2, function() {
-            sleep(30);
-        });
-}
-```
-
-### getFifoStats() ###
-
-This method returns information about the state of the FIFO buffer.
-
-#### Return Value ####
-
-Table &mdash; the FIFO buffer state:
-
-| Key | Type | Description |
-| --- | --- | --- |
-| *watermark* | Boolean | `true` if watermark has been set |
-| *overrun* | Boolean | `true` if data has been overwritten without being read |
-| *empty* | Boolean | `true` if buffer is empty |
-| *unread* | Integer | Number of unread slots in buffer |
-
-### configureHighPassFilter(*filters[, cutoff][, mode]*) ###
-
-This method configures the high-pass filter.
-
-#### Parameters ####
-
-| Parameter | Type | Required? | Description |
-| --- | --- | --- | --- |
-| *filters* | Integer | Yes | Select the filter(s) to enable/disable by OR-ing together any of the constants found in the [filters table](#filters) below |
-| *cutoff* | Integer | No | See the high-pass filter [cut-off frequency table](#high-pass-filter-cut-off-frequencies) below. Default: *LIS3DH_HPF_CUTOFF1* |
-| *mode* | Integer | No | See [modes table](#modes) below. Default: *LIS3DH_HPF_DEFAULT_MODE* |
-
-#### Filters ####
-
-| Filter Constant | Description |
-| --- | --- |
-| *LIS3DH_HPF_AOI_INT1* | High-pass filter enabled for AOI function on interrupt 1 |
-| *LIS3DH_HPF_AOI_INT2* | High-pass filter enabled for AOI function on interrupt 2 |
-| *LIS3DH_HPF_CLICK* | High-pass filter enabled for CLICK function |
-| *LIS3DH_HPF_FDS* | Filtered data selection. Enables data from internal filter sent to output register and FIFO |
-| *LIS3DH_HPF_DISABLED* | Disables all filters |
-
-#### High-pass Filter Cut-off Frequencies ####
-
-| Cut-off Constant | f@1Hz | f@10Hz | f@25Hz | f@50Hz | f@100Hz | f@200Hz | f@400Hz | f@1600Hz | f@5000Hz |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| *LIS3DH_HPF_CUTOFF1* | 0.02 | 0.2 | 0.5 | 1 | 2 | 4 | 8 | 32 | 100 |
-| *LIS3DH_HPF_CUTOFF2* | 0.008 | 0.08 | 0.2 | 0.5 | 1 | 2 | 4 | 16 | 50 |
-| *LIS3DH_HPF_CUTOFF3* | 0.004 | 0.04 | 0.1 | 0.2 | 0.5 | 1 | 2 | 8 | 25 |
-| *LIS3DH_HPF_CUTOFF4* | 0.002 | 0.02 | 0.05 | 0.1 | 0.2 | 0.5 | 1 | 4 | 12 |
-
-#### Modes ####
-
-| Mode Constant | Description |
-| --- | --- |
-| *LIS3DH_HPF_DEFAULT_MODE* | Normal mode (reset reading *HP_RESET_FILTER*) |
-| *LIS3DH_HPF_REFERENCE_SIGNAL* | Reference signal for filtering |
-| *LIS3DH_HPF_NORMAL_MODE* | Normal mode |
-| *LIS3DH_HPF_AUTORESET_ON_INTERRUPT* | Autoreset on interrupt event |
-
-#### Return Value ####
-
-Nothing.
-
-#### Example ####
-
-```squirrel
-// Enable high-pass filter on click and inertial interrupt 1 with auto reset on interrupt event
-accel.configureHighPassFilter(LIS3DH_HPF_AOI_INT1 | LIS3DH_HPF_CLICK,
-                              null,
-                              LIS3DH_HPF_AUTORESET_ON_INTERRUPT);
-
-// Disable high pass filter
-accel.configureHighPassFilter(LIS3DH_HPF_DISABLED);
-```
-
-### getDeviceId() ###
-
-This method returns the one-byte device ID of the sensor (from the *WHO_AM_I* register). The *getDeviceId()* method is a simple way to test if your LIS3DH sensor is correctly connected.
-
-#### Return Value ####
-
-Integer &mdash; single-byte device ID.
-
-#### Example ####
-
-```squirrel
-server.log(format("Device ID: 0x%02X", accel.getDeviceId()));
+local result = accel.getInterruptTable();
+if (result.int1) server.log("Interrupt was triggered");
 ```
 
 ## License ##

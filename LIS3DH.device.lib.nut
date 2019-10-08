@@ -31,7 +31,7 @@ const LIS3DH_CTRL_REG3     = 0x22; // Int1 interrupt type enable/disable
 const LIS3DH_CTRL_REG4     = 0x23; // BDU, endian data sel, range, high res mode, self test, SPI 3 or 4 wire
 const LIS3DH_CTRL_REG5     = 0x24; // boot, FIFO enable, latch int1 & int2, 4D enable int1 & int2 with 6D bit set
 const LIS3DH_CTRL_REG6     = 0x25; // int2 interrupt settings, set polarity of int1 and int2 pins
-const LIS3DH_OUT_X_L_INCR  = 0xA8; //
+const LIS3DH_OUT_X_L_INCR  = 0xA8; 
 const LIS3DH_OUT_X_L       = 0x28;
 const LIS3DH_OUT_X_H       = 0x29;
 const LIS3DH_OUT_Y_L       = 0x2A;
@@ -51,7 +51,6 @@ const LIS3DH_TIME_LIMIT    = 0x3B;
 const LIS3DH_TIME_LATENCY  = 0x3C;
 const LIS3DH_TIME_WINDOW   = 0x3D;
 const LIS3DH_WHO_AM_I      = 0x0F;
-
 
 // Bitfield values
 const LIS3DH_X_LOW         = 0x01;
@@ -98,19 +97,21 @@ const LIS3DH_ADC2 = 0x02;
 const LIS3DH_ADC3 = 0x03;
 
 class LIS3DH {
-    static VERSION = "2.0.3";
+
+    static VERSION = "3.0.0";
 
     // I2C information
-    _i2c = null;
+    _i2c  = null;
     _addr = null;
-    _mode = LIS3DH_MODE_NORMAL;
 
     // The full-scale range (+/- _range G)
     _range = null;
+    _mode = null;
 
     constructor(i2c, addr = 0x30) {
-        _i2c = i2c;
+        _i2c  = i2c;
         _addr = addr;
+        _mode = LIS3DH_MODE_NORMAL;
 
         // Read the range + set _range property
         getRange();
@@ -166,6 +167,18 @@ class LIS3DH {
         return (val * 0.4) + 1.2;
     }
 
+    // Set the state of the accelerometer axes
+    function enable(state = true) {
+        // LIS3DH_CTRL_REG1 enables/disables accelerometer axes
+        // bit 0 = X axis
+        // bit 1 = Y axis
+        // bit 2 = Z axis
+        local val = _getReg(LIS3DH_CTRL_REG1);
+        if (state) { val = val | 0x07; }
+        else { val = val & 0xF8; }
+        _setReg(LIS3DH_CTRL_REG1, val);
+    }
+
     // Read data from the Accelerometer
     // Returns a table {x: <data>, y: <data>, z: <data>}
     function getAccel(cb = null) {
@@ -192,6 +205,26 @@ class LIS3DH {
 
         // Invoke the callback if one was passed
         imp.wakeup(0, function() { cb(result); });
+    }
+
+    // get the currently-set full-scale range of the accelerometer
+    function getRange() {
+        local range_bits = (_getReg(LIS3DH_CTRL_REG4) & 0x30) >> 4;
+        if (range_bits == 0x00) {
+            _range = 2;
+        } else if (range_bits == 0x01) {
+            _range = 4;
+        } else if (range_bits == 0x02) {
+            _range = 8;
+        } else {
+            _range = 16;
+        }
+        return _range;
+    }
+
+    // Returns the deviceID (should be 51)
+    function getDeviceId() {
+        return _getReg(LIS3DH_WHO_AM_I);
     }
 
     // Set Accelerometer Data Rate in Hz
@@ -258,32 +291,12 @@ class LIS3DH {
         return _range;
     }
 
-    // get the currently-set full-scale range of the accelerometer
-    function getRange() {
-        local range_bits = (_getReg(LIS3DH_CTRL_REG4) & 0x30) >> 4;
-        if (range_bits == 0x00) {
-            _range = 2;
-        } else if (range_bits == 0x01) {
-            _range = 4;
-        } else if (range_bits == 0x02) {
-            _range = 8;
-        } else {
-            _range = 16;
-        }
-        return _range;
-    }
-
     // Set the mode of the accelerometer by passing a constant (LIS3DH_MODE_NORMAL,
     // LIS3DH_MODE_LOW_POWER, LIS3DH_MODE_HIGH_RESOLUTION)
     function setMode(mode) {
         _setRegBit(LIS3DH_CTRL_REG1, 3, mode & 0x01);
         _setRegBit(LIS3DH_CTRL_REG4, 3, mode & 0x02);
         _mode = mode;
-    }
-
-    // Returns the deviceID (should be 51)
-    function getDeviceId() {
-        return _getReg(LIS3DH_WHO_AM_I);
     }
 
     function configureHighPassFilter(filters, cutoff = LIS3DH_HPF_CUTOFF1, mode = LIS3DH_HPF_DEFAULT_MODE) {
@@ -294,29 +307,52 @@ class LIS3DH {
         _setReg(LIS3DH_CTRL_REG2, filters | cutoff | mode);
     }
 
-    //-------------------- INTERRUPTS --------------------//
-
-    // Enable/disable and configure FIFO buffer watermark interrupts
-    function configureFifoInterrupt(enable, fifomode = 0x80, watermark = 28) {
+    // Enable/disable and configure FIFO buffer
+    function configureFifo(enBuffer, fifomode = LIS3DH_FIFO_STREAM_MODE) {
 
         // Enable/disable the FIFO buffer
-        _setRegBit(LIS3DH_CTRL_REG5, 6, enable ? 1 : 0);
+        _setRegBit(LIS3DH_CTRL_REG5, 6, enBuffer ? 1 : 0);
 
-        if (enable) {
-            // Stream-to-FIFO mode, watermark of [28].
-            _setReg(LIS3DH_FIFO_CTRL_REG, (fifomode & 0xc0) | (watermark & 0x1F));
+        // NOTE: FIFO Trigger selection (LIS3DH_FIFO_CTRL_REG bit 5) defaults to int1
+        // this library currently doesn't change this bit, so trigger selection is  
+        // alwasys set to trigger on int1 
+
+        local val = _getReg(LIS3DH_FIFO_CTRL_REG) & 0x3F;
+
+        if (enBuffer) {
+            _setReg(LIS3DH_FIFO_CTRL_REG, (val | fifomode));
         } else {
-            _setReg(LIS3DH_FIFO_CTRL_REG, 0x00);
+            // Set mode to bypass
+            _setReg(LIS3DH_FIFO_CTRL_REG, val);
+        }
+    }
+
+    //-------------------- INTERRUPTS --------------------//
+
+    // Enable/Disable FIFO watermark and/or FIFO overrun interrupts on Int1 pin
+    function configureFifoInterrupts(enWatermark, enOverrun = false, watermark = 29) {
+        // Adjust if optional parameters are not expected types
+        if (typeof enOverrun == "integer") {
+            watermark = enOverrun;
+            enOverrun = false;
         }
 
-        // Enable/disable watermark interrupt
-        _setRegBit(LIS3DH_CTRL_REG3, 2, enable ? 1 : 0);
+        local fcVal = _getReg(LIS3DH_FIFO_CTRL_REG) & 0xE0;
+        // NOTE: Watermark range in register is 0-31, so adjust given watermark value 
+        // down by one
+        fcVal = fcVal | (--watermark & 0x1F);
+        // Set watermark
+        _setReg(LIS3DH_FIFO_CTRL_REG, fcVal);
 
+        local r3val = _getReg(LIS3DH_CTRL_REG3) & 0xF9;
+        if (enWatermark) r3val = r3val | 0x04;
+        if (enOverrun)   r3val = r3val | 0x02;
+        _setReg(LIS3DH_CTRL_REG3, r3val);
     }
 
     // Enable/disable and configure inertial interrupts
-    function configureInertialInterrupt(enable, threshold = 2.0, duration = 5,
-    options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH) {
+    function configureInertialInterrupt(enable, threshold = 2.0, duration = 5, 
+                                        options = LIS3DH_X_HIGH | LIS3DH_Y_HIGH | LIS3DH_Z_HIGH) {
 
         // Set the enable flag
         _setRegBit(LIS3DH_CTRL_REG3, 6, enable ? 1 : 0);
